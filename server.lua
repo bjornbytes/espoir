@@ -22,6 +22,7 @@ function server:init()
   self.upload = trickle.create()
   self.download = trickle.create()
 
+	self.gameState = 'waiting'
   self.players = {}
 	self.lastSync = lovr.timer.getTime()
 
@@ -112,6 +113,10 @@ function server:createPlayer(peer)
     x = 2 ^ 15,
     y = 43000, -- 1.6m
     z = 2 ^ 15,
+		angle = 0,
+		ax = 0,
+		ay = 0,
+		az = 0,
     stars = 3,
     money = 10,
     cards = {
@@ -156,12 +161,19 @@ end
 server.messages = {}
 function server.messages.join(self, peer, data)
   local player = self:createPlayer(peer)
-  self:send(peer, 'join', { id = player.id })
+  self:send(peer, 'join', { id = player.id, state = self.gameState })
   self:broadcast('player', player)
+	local count = 0
 	for i = 1, config.maxPlayers do
-		if self.players[i] then
+		if self.players[i] and i ~= player.id then
+			count = count + 1
 			self:send(peer, 'player', self.players[i])
 		end
+	end
+
+	if self.gameState == 'waiting' and count >= config.groupSize then
+		self.gameState = 'playing'
+		self:broadcast('gamestate', { state = self.gameState })
 	end
 end
 
@@ -169,6 +181,7 @@ function server.messages.input(self, peer, data)
   if not self.players[peer] then return end
   local player = self.players[self.players[peer]]
   player.x, player.y, player.z = data.x, data.y, data.z
+  player.angle, player.ax, player.ay, player.az = data.angle, data.ax, data.ay, data.az
 end
 
 return server

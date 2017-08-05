@@ -2,6 +2,9 @@ local enet = require 'enet'
 local trickle = require 'trickle'
 local config = require 'config'
 local signatures = require 'signatures'
+local maf = require 'maf'
+local vec3 = maf.vec3
+local quat = maf.quat
 
 local client = {}
 
@@ -19,12 +22,16 @@ end
 
 function client:init()
   self:reset()
+	self:refreshControllers()
 	self.lastInput = lovr.timer.getTime()
+	self.models = {
+		rock = lovr.graphics.newModel('media/rock-card.obj', 'media/rock-side.png'),
+		paper = lovr.graphics.newModel('media/paper-card.obj', 'media/paper-side.png'),
+		scissors = lovr.graphics.newModel('media/scissor-card.obj', 'media/scissor-side.png')
+	}
 end
 
 function client:update(dt)
-	local _, y = lovr.headset.getPosition()
-	print(y, normalize(y), denormalize(normalize(y)))
 	while true do
 		local event = self.host:service(0)
 		if not event then break end
@@ -36,18 +43,70 @@ function client:update(dt)
 	local t = lovr.timer.getTime()
   if self.state == 'server' and self.peer and (t - self.lastInput) >= config.inputRate then
     local x, y, z = lovr.headset.getPosition()
-    self:send('input', { x = normalize(x), y = normalize(y), z = normalize(z) })
+    local angle, ax, ay, az = lovr.headset.getOrientation()
+    self:send('input', {
+			x = normalize(x),
+			y = normalize(y),
+			z = normalize(z),
+			angle = math.floor((angle / (2 * math.pi)) * (2 ^ 16)),
+			ax = math.floor(ax * (2 ^ 16)),
+			ay = math.floor(ay * (2 ^ 16)),
+			az = math.floor(az * (2 ^ 16))
+		})
 		self.lastInput = t
   end
 end
 
 function client:draw()
-  for i, player in ipairs(self.players) do
-    if player.id ~= self.id then
-      local x, y, z = denormalize(player.x), denormalize(player.y), denormalize(player.z)
-      lovr.graphics.cube('fill', x, y, z, .3)
-    end
-  end
+	if self.state == 'server' then
+		lovr.graphics.setColor(255, 255, 255)
+		lovr.graphics.plane('fill', 0, 0, 0, 10, math.pi / 2, 1, 0, 0)
+
+		if self.gameState == 'waiting' then
+			lovr.graphics.print('Waiting for contestants...', 0, 3, -5, .5)
+		end
+
+		for i, player in ipairs(self.players) do
+			if player.id ~= self.id then
+				local x, y, z = denormalize(player.x), denormalize(player.y), denormalize(player.z)
+				local angle, ax, ay, az = (player.angle / (2 ^ 16)) * (2 * math.pi), player.ax / (2 ^ 16), player.ay / (2 ^ 16), player.az / (2 ^ 16)
+				lovr.graphics.cube('fill', x, y, z, .3, angle, ax, ay, az)
+			else
+				if self.controllers[1] then
+					local cardCount = 0
+					for i, card in ipairs(player.cards) do
+						if card.position > 0 then
+							cardCount = cardCount + 1
+						end
+					end
+
+					local spread = .1
+					local fan = -(cardCount - 1) / 2 * spread
+					for i, card in ipairs(player.cards) do
+						local x, y, z = self.controllers[1]:getPosition()
+						local angle, ax, ay, az = self.controllers[1]:getOrientation()
+						lovr.graphics.push()
+						lovr.graphics.translate(x, y, z)
+						lovr.graphics.rotate(angle, ax, ay, az)
+						lovr.graphics.push()
+						lovr.graphics.rotate(fan, 0, 1, 0)
+						lovr.graphics.translate(0, 0, -.2)
+						self.models.rock:draw(0, 0, 0, 1, math.pi / 2, 1, 1, 0)
+						lovr.graphics.pop()
+						lovr.graphics.pop()
+						fan = fan + spread
+					end
+				end
+			end
+		end
+	end
+
+	if self.controllerModel then
+		for i, controller in ipairs(self.controllers) do
+			local x, y, z = controller:getPosition()
+			self.controllerModel:draw(x, y, z, 1, controller:getOrientation())
+		end
+	end
 end
 
 function client:quit()
@@ -55,6 +114,25 @@ function client:quit()
     self.peer:disconnect_now()
     self.host:flush()
   end
+end
+
+function client:controlleradded()
+	self:refreshControllers()
+end
+
+function client:controllerremoved()
+	self:refreshControllers()
+end
+
+function client:refreshControllers()
+	self.controllers = {}
+
+	local controllers = lovr.headset.getControllers()
+	for i = 1, lovr.headset.getControllerCount() do
+		local controller = controllers[i]
+		self.controllerModel = self.controllerModel or controller:newModel()
+		self.controllers[i] = controller
+	end
 end
 
 function client:connect(address)
@@ -118,6 +196,7 @@ end
 client.events.server = {}
 function client.events.server.connect(self, event)
   log('event', 'connect')
+	self.gameState = 'waiting'
   self.peer = event.peer
 	self:send('join')
 end
@@ -153,6 +232,7 @@ end
 client.messages.server = {}
 function client.messages.server.join(self, data)
 	self.id = data.id
+	self.gameState = data.state
 end
 
 function client.messages.server.player(self, data)
@@ -172,6 +252,10 @@ function client.messages.server.sync(self, data)
 			p.x, p.y, p.z = player.x, player.y, player.z
 		end
 	end
+end
+
+function client.messages.server.gamestate(self, data)
+	self.gameState = data.state
 end
 
 return client

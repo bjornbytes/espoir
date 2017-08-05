@@ -32,7 +32,8 @@ signatures.server = {
   'join',
   join = {
     id = 1,
-    { 'id', '8bits' }
+    { 'id', '8bits' },
+		{ 'state', 'string' }
   },
 
   'player',
@@ -43,6 +44,10 @@ signatures.server = {
     { 'x', '16bits' },
     { 'y', '16bits' },
     { 'z', '16bits' },
+		{ 'angle', '16bits' },
+    { 'ax', '16bits' },
+    { 'ay', '16bits' },
+    { 'az', '16bits' },
     { 'stars', '4bits' },
     { 'money', '8bits' },
     { 'cards', { { 'type', '2bits' }, { 'position', '4bits' } } }
@@ -56,10 +61,20 @@ signatures.server = {
         { 'id', '8bits' },
         { 'x', '16bits' },
         { 'y', '16bits' },
-        { 'z', '16bits' }
+        { 'z', '16bits' },
+				{ 'angle', '16bits' },
+				{ 'ax', '16bits' },
+				{ 'ay', '16bits' },
+				{ 'az', '16bits' },
       }
     }
-  }
+  },
+
+	'gamestate',
+	gamestate = {
+		id = 4,
+		{ 'state', 'string' }
+	}
 }
 
 return signatures

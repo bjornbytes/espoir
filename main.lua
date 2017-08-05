@@ -23,3 +23,11 @@ end
 function lovr.quit()
   controller:quit()
 end
+
+function lovr.controlleradded(...)
+	if controller.controlleradded then controller:controlleradded(...) end
+end
+
+function lovr.controllerremoved(...)
+	if controller.controllerremoved then controller:controllerremoved(...) end
+end
