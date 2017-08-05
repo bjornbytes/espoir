@@ -54,7 +54,7 @@ end
 
 function client:connect(address)
   if self.host and self.peer then
-    self.peer:disconnect()
+    self.peer:disconnect_now()
     self.host:flush()
     self.host = nil
   end
@@ -74,7 +74,9 @@ function client:reset()
 end
 
 function client:send(message, data)
-  log('send', message)
+	if message ~= 'input' then
+		log('send', message)
+	end
   self.upload:clear()
   self.upload:write(signatures.client[message].id, '4bits')
   self.upload:pack(data, signatures.client[message])
