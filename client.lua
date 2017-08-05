@@ -162,7 +162,7 @@ end
 
 function client.messages.server.sync(self, data)
 	for i, player in ipairs(data.players) do
-		if player.id ~= self.id then
+		if player.id ~= self.id and self.players[player.id] then
 			local p = self.players[player.id]
 			p.x, p.y, p.z = player.x, player.y, player.z
 		end
