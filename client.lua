@@ -14,7 +14,7 @@ local function normalize(x)
 end
 
 local function denormalize(x)
-  return ((x / (2 ^ 16)) - .5) * config.bounds
+  return ((x / (2 ^ 16)) - .5) * 2 * config.bounds
 end
 
 function client:init()
@@ -23,6 +23,8 @@ function client:init()
 end
 
 function client:update(dt)
+	local _, y = lovr.headset.getPosition()
+	print(y, normalize(y), denormalize(normalize(y)))
 	while true do
 		local event = self.host:service(0)
 		if not event then break end
