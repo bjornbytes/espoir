@@ -10,7 +10,7 @@ local function log(...)
 end
 
 local function normalize(x)
-  return math.floor((((x / config.bounds) * .5) + 1) * (2 ^ 16))
+	return math.floor(((x + config.bounds) / (2 * config.bounds)) * (2 ^ 16))
 end
 
 local function denormalize(x)
