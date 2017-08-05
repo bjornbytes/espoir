@@ -10,11 +10,11 @@ local function log(...)
 end
 
 local function normalize(x)
-  return ((x / (2 ^ 16)) - .5) * config.bounds
+  return math.floor((((x / config.bounds) * .5) + 1) * (2 ^ 16))
 end
 
 local function denormalize(x)
-  return math.floor((((x / config.bounds) * .5) + 1) * (2 ^ 16))
+  return ((x / (2 ^ 16)) - .5) * config.bounds
 end
 
 function client:init()
@@ -29,14 +29,15 @@ function client:update(dt)
 
   if self.state == 'server' and self.peer then
     local x, y, z = lovr.headset.getPosition()
-    self:send('input', { x = x, y = y, z = z })
+    self:send('input', { x = normalize(x), y = normalize(y), z = normalize(z) })
   end
 end
 
 function client:draw()
   for i, player in ipairs(self.players) do
     if player.id ~= self.id then
-      local x, y, z = normalize(player.x), normalize(player.y), normalize(player.z)
+      local x, y, z = denormalize(player.x), denormalize(player.y), denormalize(player.z)
+			print('drawing player ' .. player.id .. ' at ' .. x .. ', ' .. y .. ', ' .. z)
       lovr.graphics.cube('fill', x, y, z, .3)
     end
   end

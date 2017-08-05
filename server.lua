@@ -34,7 +34,14 @@ function server:update(dt)
   end
 
   if #self.players > 1 then
-    self:broadcast('sync', self.players)
+		local payload = { players = {} }
+		for i = 1, config.maxPlayers do
+			if self.players[i] then
+				table.insert(payload.players, players[i])
+			end
+		end
+
+    self:broadcast('sync', payload)
   end
 end
 
