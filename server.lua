@@ -23,6 +23,7 @@ function server:init()
   self.download = trickle.create()
 
   self.players = {}
+	self.lastSync = lovr.timer.getTime()
 
   print('Server ready on ' .. self.host:get_socket_address())
 end
@@ -36,7 +37,8 @@ function server:update(dt)
 		end
 	end
 
-	if #self.players > 1 then
+	local t = lovr.timer.getTime()
+	if #self.players > 1 and (t - self.lastSync) > config.syncRate then
 		local payload = { players = {} }
 		for i = 1, config.maxPlayers do
 			if self.players[i] then
@@ -45,6 +47,7 @@ function server:update(dt)
 		end
 
 		self:broadcast('sync', payload)
+		self.lastSync = t
 	end
 end
 
@@ -161,7 +164,6 @@ function server.messages.input(self, peer, data)
   if not self.players[peer] then return end
   local player = self.players[self.players[peer]]
   player.x, player.y, player.z = data.x, data.y, data.z
-  print('player ' .. player.id .. ' is now at ' .. data.x .. ', ' .. data.y .. ', ' .. data.z)
 end
 
 return server

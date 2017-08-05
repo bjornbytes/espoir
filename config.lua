@@ -3,5 +3,6 @@ return {
   remote = arg[3] or '127.0.0.1',
   groupSize = 2,
   bounds = 5,
-  maxPlayers = 32
+  maxPlayers = 32,
+	syncRate = .03
 }
