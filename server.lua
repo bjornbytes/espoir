@@ -160,7 +160,7 @@ function server.messages.join(self, peer, data)
   self:broadcast('player', player)
 	for i = 1, config.maxPlayers do
 		if self.players[i] then
-			self:send(peer, 'player', player)
+			self:send(peer, 'player', self.players[i])
 		end
 	end
 end
