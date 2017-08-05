@@ -24,7 +24,7 @@ signatures.lobby = {
   'start',
   start = {
     id = 1,
-    { 'server', 'string' }
+    { 'port', '16bits' }
   }
 }
 

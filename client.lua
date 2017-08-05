@@ -67,7 +67,7 @@ function client:reset()
   self.state = 'lobby'
   self.id = nil
   self.players = {}
-  self:connect(arg[3] or 'localhost:12512')
+  self:connect(config.remote .. ':12512')
 end
 
 function client:send(message, data)
@@ -139,7 +139,7 @@ client.messages = {}
 client.messages.lobby = {}
 function client.messages.lobby.start(self, data)
   self.state = 'server'
-  self:connect(data.server)
+  self:connect(config.remote .. ':' .. data.port)
 end
 
 client.messages.server = {}

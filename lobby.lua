@@ -73,7 +73,7 @@ function lobby:start()
   end
 
   while #self.queue > 0 do
-    self:send(self.queue[#self.queue], 'start', { server = 'localhost:12513' })
+    self:send(self.queue[#self.queue], 'start', { port = 12513 })
     self.queue[#self.queue]:send(tostring(self.upload))
     self.queue[#self.queue]:disconnect_later()
     table.remove(self.queue)
