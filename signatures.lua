@@ -1,10 +1,15 @@
 local signatures = {}
 
 signatures.client = {
-  'join',
-  join = {
+  'queue',
+  queue = {
     id = 1
-  }
+  },
+
+	'join',
+	join = {
+		id = 2
+	}
 }
 
 signatures.lobby = {
@@ -15,6 +20,22 @@ signatures.lobby = {
   }
 }
 
-signatures.server = {}
+signatures.server = {
+	'join',
+	join = {
+		id = 1,
+		{ 'id', '8bits' }
+	},
+
+	'player',
+	player = {
+		id = 2,
+		{ 'id', '8bits' },
+		{ 'username', 'string' },
+		{ 'stars', '4bits' },
+		{ 'money', '8bits' },
+		{ 'cards', { { 'type', '2bits' }, { 'position', '4bits' } } }
+	}
+}
 
 return signatures

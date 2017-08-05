@@ -116,7 +116,7 @@ function lobby.events.receive(self, event)
 end
 
 lobby.messages = {}
-function lobby.messages.join(self, peer, data)
+function lobby.messages.queue(self, peer, data)
   self:enqueue(peer)
 end
 
