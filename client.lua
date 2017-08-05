@@ -42,8 +42,10 @@ end
 function client:draw()
 	print('draw', #self.players)
   for i, player in ipairs(self.players) do
+		print(player.id, self.id)
     if player.id ~= self.id then
       local x, y, z = denormalize(player.x), denormalize(player.y), denormalize(player.z)
+			print(x, y, z)
       lovr.graphics.cube('fill', x, y, z, .3)
     end
   end
