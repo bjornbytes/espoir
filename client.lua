@@ -160,4 +160,13 @@ function client.messages.server.player(self, data)
 	end
 end
 
+function client.messages.server.sync(self, data)
+	for i, player in ipairs(data.players) do
+		if player.id ~= self.id then
+			local p = self.players[player.id]
+			p.x, p.y, p.z = player.x, player.y, player.z
+		end
+	end
+end
+
 return client

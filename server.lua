@@ -158,6 +158,11 @@ function server.messages.join(self, peer, data)
   local player = self:createPlayer(peer)
   self:send(peer, 'join', { id = player.id })
   self:broadcast('player', player)
+	for i = 1, config.maxPlayers do
+		if self.players[i] then
+			self:send(peer, 'player', player)
+		end
+	end
 end
 
 function server.messages.input(self, peer, data)
