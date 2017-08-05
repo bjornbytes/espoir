@@ -1,12 +1,19 @@
 local signatures = {}
 
 signatures.client = {
-  authenticate = {
-    { 'username', 'string' }
+  'join',
+  join = {
+    id = 1
   }
 }
 
-signatures.lobby = {}
+signatures.lobby = {
+  'start',
+  start = {
+    id = 1,
+    { 'server', 'string' }
+  }
+}
 
 signatures.server = {}
 

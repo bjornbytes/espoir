@@ -1,7 +1,7 @@
-MODE = arg[2] or 'client'
+local config = require 'config'
 
 function lovr.conf(t)
-  if MODE ~= 'client' then
+  if config.role ~= 'client' then
     t.modules.headset = false
     t.modules.graphics = false
     t.modules.audio = false
