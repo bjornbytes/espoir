@@ -41,6 +41,7 @@ end
 
 function client:draw()
 	print('draw', #self.players)
+	print(self.players[1], self.players[1] and self.players[1].x)
   for i, player in ipairs(self.players) do
 		print(player.id, self.id)
     if player.id ~= self.id then
