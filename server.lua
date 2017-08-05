@@ -2,9 +2,11 @@ local enet = require 'enet'
 local trickle = require 'trickle'
 local config = require 'config'
 local signatures = require 'signatures'
+local words = require 'words'
 
 local function log(peer, ...)
-  print('[' .. peer:index() .. ']', ...)
+	local tag = peer == 'all' and peer or peer:index()
+  print('[' .. tag .. ']', ...)
 end
 
 local server = {}
@@ -19,6 +21,8 @@ function server:init()
   self.peers = {}
   self.upload = trickle.create()
   self.download = trickle.create()
+
+	self.players = {}
 
   print('Server ready on ' .. self.host:get_socket_address())
 end
@@ -51,6 +55,54 @@ function server:send(peer, message, data)
   peer:send(tostring(self.upload))
 end
 
+function server:broadcast(message, data)
+  log('all', 'broadcast', message)
+  self.upload:clear()
+  self.upload:write(signatures.server[message].id, '4bits')
+  self.upload:pack(data, signatures.server[message])
+	self.host:broadcast(tostring(self.upload))
+end
+
+function server:generateUsername()
+	local function isTaken(username)
+		for id, player in ipairs(self.players) do
+			if player.username == username then
+				return true
+			end
+		end
+
+		return false
+	end
+
+  local username = ''
+
+	repeat
+		local adjective = words.adjectives[lovr.math.random(#words.adjectives)]
+		local noun = words.nouns[lovr.math.random(#words.nouns)]
+		username = adjective .. ' ' .. noun
+	until not isTaken(username)
+
+	return username
+end
+
+function server:createPlayer(peer)
+	local id = #self.players + 1
+	self.players[peer] = id
+	self.players[id] = {
+		id = id,
+		username = self:generateUsername(),
+		stars = 3,
+		money = 10,
+		cards = {
+			{ type = 1, position = 1 },
+			{ type = 2, position = 2 },
+			{ type = 3, position = 3 }
+		}
+	}
+
+  return self.players[id]
+end
+
 server.events = {}
 function server.events.connect(self, event)
   log(event.peer, 'event', 'connect')
@@ -78,5 +130,10 @@ function server.events.receive(self, event)
 end
 
 server.messages = {}
+function server.messages.join(self, peer, data)
+	local player = self:createPlayer(peer)
+  self:send(peer, 'join', { id = player.id })
+	self:broadcast('player', player)
+end
 
 return server

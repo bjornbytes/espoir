@@ -42,6 +42,8 @@ end
 
 function client:reset()
   self.state = 'lobby'
+  self.id = nil
+  self.players = {}
   self:connect(arg[3] or 'localhost:12512')
 end
 
@@ -53,11 +55,13 @@ function client:send(message, data)
   self.peer:send(tostring(self.upload))
 end
 
-client.events = {lobby = {}, server = {}}
+client.events = {}
+
+client.events.lobby = {}
 function client.events.lobby.connect(self, event)
   log('event', 'connect')
   self.peer = event.peer
-  self:send('join')
+  self:send('queue')
 end
 
 function client.events.lobby.disconnect(self, event)
@@ -80,9 +84,11 @@ function client.events.lobby.receive(self, event)
   end
 end
 
+client.events.server = {}
 function client.events.server.connect(self, event)
   log('event', 'connect')
   self.peer = event.peer
+	self:send('join')
 end
 
 function client.events.server.disconnect(self, event)
@@ -105,11 +111,27 @@ function client.events.server.receive(self, event)
   end
 end
 
-client.messages = {lobby = {}, server = {}}
+client.messages = {}
 
+client.messages.lobby = {}
 function client.messages.lobby.start(self, data)
   self.state = 'server'
   self:connect(data.server)
+end
+
+client.messages.server = {}
+function client.messages.server.join(self, data)
+	self.id = data.id
+end
+
+function client.messages.server.player(self, data)
+	self.players[data.id] = data
+
+	if data.id == self.id then
+		print('Oh hey!  My username is ' .. data.username)
+		print('I have ' .. data.stars .. ' stars!')
+		print('I have $' .. data.money .. '000!')
+	end
 end
 
 return client
