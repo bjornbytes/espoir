@@ -1,11 +1,20 @@
 local enet = require 'enet'
 local trickle = require 'trickle'
+local config = require 'config'
 local signatures = require 'signatures'
 
 local client = {}
 
 local function log(...)
   print(client.state, ...)
+end
+
+local function normalize(x)
+  return ((x / (2 ^ 16)) - .5) * config.bounds
+end
+
+local function denormalize(x)
+  return math.floor((((x / config.bounds) * .5) + 1) * (2 ^ 16))
 end
 
 function client:init()
@@ -16,6 +25,20 @@ function client:update(dt)
   local event = self.host:service(0)
   if event and self.events[self.state][event.type] then
     self.events[self.state][event.type](self, event)
+  end
+
+  if self.state == 'server' and self.peer then
+    local x, y, z = lovr.headset.getPosition()
+    self:send('input', { x = x, y = y, z = z })
+  end
+end
+
+function client:draw()
+  for i, player in ipairs(self.players) do
+    if player.id ~= self.id then
+      local x, y, z = normalize(player.x), normalize(player.y), normalize(player.z)
+      lovr.graphics.cube('fill', x, y, z, .3)
+    end
   end
 end
 

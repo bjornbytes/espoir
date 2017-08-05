@@ -16,6 +16,10 @@ function lovr.update(dt)
   controller:update(dt)
 end
 
+function lovr.draw()
+  if controller.draw then controller:draw() end
+end
+
 function lovr.quit()
   controller:quit()
 end

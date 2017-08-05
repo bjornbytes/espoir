@@ -5,7 +5,7 @@ local signatures = require 'signatures'
 local words = require 'words'
 
 local function log(peer, ...)
-	local tag = peer == 'all' and peer or peer:index()
+  local tag = peer == 'all' and peer or peer:index()
   print('[' .. tag .. ']', ...)
 end
 
@@ -22,7 +22,7 @@ function server:init()
   self.upload = trickle.create()
   self.download = trickle.create()
 
-	self.players = {}
+  self.players = {}
 
   print('Server ready on ' .. self.host:get_socket_address())
 end
@@ -31,6 +31,10 @@ function server:update(dt)
   local event = self.host:service(0)
   if event and self.events[event.type] then
     self.events[event.type](self, event)
+  end
+
+  if #self.players > 1 then
+    self:broadcast('sync', self.players)
   end
 end
 
@@ -60,45 +64,49 @@ function server:broadcast(message, data)
   self.upload:clear()
   self.upload:write(signatures.server[message].id, '4bits')
   self.upload:pack(data, signatures.server[message])
-	self.host:broadcast(tostring(self.upload))
+  self.host:broadcast(tostring(self.upload))
 end
 
 function server:generateUsername()
-	local function isTaken(username)
-		for id, player in ipairs(self.players) do
-			if player.username == username then
-				return true
-			end
-		end
+  local function isTaken(username)
+    for i = 1, config.maxPlayers do
+      local player = self.players[i]
+      if player and player.username == username then
+        return true
+      end
+    end
 
-		return false
-	end
+    return false
+  end
 
   local username = ''
 
-	repeat
-		local adjective = words.adjectives[lovr.math.random(#words.adjectives)]
-		local noun = words.nouns[lovr.math.random(#words.nouns)]
-		username = adjective .. ' ' .. noun
-	until not isTaken(username)
+  repeat
+    local adjective = words.adjectives[lovr.math.random(#words.adjectives)]
+    local noun = words.nouns[lovr.math.random(#words.nouns)]
+    username = adjective .. ' ' .. noun
+  until not isTaken(username)
 
-	return username
+  return username
 end
 
 function server:createPlayer(peer)
-	local id = #self.players + 1
-	self.players[peer] = id
-	self.players[id] = {
-		id = id,
-		username = self:generateUsername(),
-		stars = 3,
-		money = 10,
-		cards = {
-			{ type = 1, position = 1 },
-			{ type = 2, position = 2 },
-			{ type = 3, position = 3 }
-		}
-	}
+  local id = #self.players + 1
+  self.players[peer] = id
+  self.players[id] = {
+    id = id,
+    username = self:generateUsername(),
+    x = 2 ^ 15,
+    y = 43000, -- 1.6m
+    z = 2 ^ 15,
+    stars = 3,
+    money = 10,
+    cards = {
+      { type = 1, position = 1 },
+      { type = 2, position = 2 },
+      { type = 3, position = 3 }
+    }
+  }
 
   return self.players[id]
 end
@@ -112,6 +120,9 @@ end
 function server.events.disconnect(self, event)
   log(event.peer, 'event', 'disconnect')
   self.peers[event.peer] = nil
+  local id = self.players[event.peer]
+  self.players[id] = nil
+  self.players[event.peer] = nil
 end
 
 function server.events.receive(self, event)
@@ -131,9 +142,16 @@ end
 
 server.messages = {}
 function server.messages.join(self, peer, data)
-	local player = self:createPlayer(peer)
+  local player = self:createPlayer(peer)
   self:send(peer, 'join', { id = player.id })
-	self:broadcast('player', player)
+  self:broadcast('player', player)
+end
+
+function server.messages.input(self, peer, data)
+  if not self.players[peer] then return end
+  local player = self.players[self.players[peer]]
+  player.x, player.y, player.z = data.x, data.y, data.z
+  print('player ' .. player.id .. ' is now at ' .. data.x .. ', ' .. data.y .. ', ' .. data.z)
 end
 
 return server
