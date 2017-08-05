@@ -40,6 +40,7 @@ function client:update(dt)
 end
 
 function client:draw()
+	print('draw', #self.players)
   for i, player in ipairs(self.players) do
     if player.id ~= self.id then
       local x, y, z = denormalize(player.x), denormalize(player.y), denormalize(player.z)
@@ -164,6 +165,7 @@ function client.messages.server.player(self, data)
 end
 
 function client.messages.server.sync(self, data)
+	print('sync', #data.players, #self.players)
 	for i, player in ipairs(data.players) do
 		print(player.id .. ' is at ' .. player.x .. ', ' .. player.y .. ', ' .. player.z)
 		if player.id ~= self.id and self.players[player.id] then
