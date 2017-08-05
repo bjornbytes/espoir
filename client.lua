@@ -40,13 +40,10 @@ function client:update(dt)
 end
 
 function client:draw()
-	print('draw', #self.players)
-	print(self.players[1], self.players[1] and self.players[1].x)
+	print(#self.players, self.players[0], self.players[1], self.players[2], next(self.players))
   for i, player in ipairs(self.players) do
-		print(player.id, self.id)
     if player.id ~= self.id then
       local x, y, z = denormalize(player.x), denormalize(player.y), denormalize(player.z)
-			print(x, y, z)
       lovr.graphics.cube('fill', x, y, z, .3)
     end
   end
@@ -154,13 +151,13 @@ end
 
 client.messages.server = {}
 function client.messages.server.join(self, data)
-	self.id = data.id
+	self.id = tonumber(data.id)
 end
 
 function client.messages.server.player(self, data)
 	self.players[data.id] = data
 
-	if data.id == self.id then
+	if tonumber(data.id) == self.id then
 		print('Oh hey!  My username is ' .. data.username)
 		print('I have ' .. data.stars .. ' stars!')
 		print('I have $' .. data.money .. '000!')
@@ -168,11 +165,10 @@ function client.messages.server.player(self, data)
 end
 
 function client.messages.server.sync(self, data)
-	print('sync', #data.players, #self.players)
 	for i, player in ipairs(data.players) do
-		print(player.id .. ' is at ' .. player.x .. ', ' .. player.y .. ', ' .. player.z)
-		if player.id ~= self.id and self.players[player.id] then
-			local p = self.players[player.id]
+		local id = tonumber(player.id)
+		if id ~= self.id and self.players[id] then
+			local p = self.players[id]
 			p.x, p.y, p.z = player.x, player.y, player.z
 		end
 	end
