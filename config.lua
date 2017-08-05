@@ -4,6 +4,6 @@ return {
   groupSize = 2,
   bounds = 5,
   maxPlayers = 32,
-	syncRate = .03,
-	inputRate = .02
+	syncRate = .016,
+	inputRate = .016
 }
