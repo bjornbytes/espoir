@@ -42,6 +42,8 @@ end
 
 function client:reset()
   self.state = 'lobby'
+  self.id = nil
+  self.players = {}
   self:connect(arg[3] or 'localhost:12512')
 end
 
@@ -86,7 +88,6 @@ client.events.server = {}
 function client.events.server.connect(self, event)
   log('event', 'connect')
   self.peer = event.peer
-	self.id = nil
 	self:send('join')
 end
 

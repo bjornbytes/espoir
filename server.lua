@@ -74,10 +74,12 @@ function server:generateUsername()
 		return false
 	end
 
+  local username = ''
+
 	repeat
 		local adjective = words.adjectives[lovr.math.random(#words.adjectives)]
 		local noun = words.nouns[lovr.math.random(#words.nouns)]
-		local username = adjective .. ' ' .. noun
+		username = adjective .. ' ' .. noun
 	until not isTaken(username)
 
 	return username
@@ -92,11 +94,13 @@ function server:createPlayer(peer)
 		stars = 3,
 		money = 10,
 		cards = {
-			{ type = 'rock', position = 1 },
-			{ type = 'paper', position = 2 },
-			{ type = 'scissors', position = 3 }
+			{ type = 1, position = 1 },
+			{ type = 2, position = 2 },
+			{ type = 3, position = 3 }
 		}
 	}
+
+  return self.players[id]
 end
 
 server.events = {}
@@ -127,8 +131,9 @@ end
 
 server.messages = {}
 function server.messages.join(self, peer, data)
-	self:createPlayer(peer)
-	self.host:broadcast('player', player)
+	local player = self:createPlayer(peer)
+  self:send(peer, 'join', { id = player.id })
+	self:broadcast('player', player)
 end
 
 return server
