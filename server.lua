@@ -28,21 +28,24 @@ function server:init()
 end
 
 function server:update(dt)
-  local event = self.host:service(0)
-  if event and self.events[event.type] then
-    self.events[event.type](self, event)
-  end
+	while true do
+		local event = self.host:service(0)
+		if not event then break end
+		if self.events[event.type] then
+			self.events[event.type](self, event)
+		end
+	end
 
-  if #self.players > 1 then
+	if #self.players > 1 then
 		local payload = { players = {} }
 		for i = 1, config.maxPlayers do
 			if self.players[i] then
-				table.insert(payload.players, players[i])
+				table.insert(payload.players, self.players[i])
 			end
 		end
 
-    self:broadcast('sync', payload)
-  end
+		self:broadcast('sync', payload)
+	end
 end
 
 function server:quit()

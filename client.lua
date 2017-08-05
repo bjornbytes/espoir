@@ -22,10 +22,13 @@ function client:init()
 end
 
 function client:update(dt)
-  local event = self.host:service(0)
-  if event and self.events[self.state][event.type] then
-    self.events[self.state][event.type](self, event)
-  end
+	while true do
+		local event = self.host:service(0)
+		if not event then break end
+		if self.events[self.state][event.type] then
+			self.events[self.state][event.type](self, event)
+		end
+	end
 
   if self.state == 'server' and self.peer then
     local x, y, z = lovr.headset.getPosition()
