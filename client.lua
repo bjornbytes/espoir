@@ -19,6 +19,7 @@ end
 
 function client:init()
   self:reset()
+	self.lastInput = lovr.timer.getTime()
 end
 
 function client:update(dt)
@@ -30,9 +31,11 @@ function client:update(dt)
 		end
 	end
 
-  if self.state == 'server' and self.peer then
+	local t = lovr.timer.getTime()
+  if self.state == 'server' and self.peer and (t - self.lastInput) >= config.inputRate then
     local x, y, z = lovr.headset.getPosition()
     self:send('input', { x = normalize(x), y = normalize(y), z = normalize(z) })
+		self.lastInput = t
   end
 end
 
@@ -74,9 +77,7 @@ function client:reset()
 end
 
 function client:send(message, data)
-	if message ~= 'input' then
-		log('send', message)
-	end
+	log('send', message)
   self.upload:clear()
   self.upload:write(signatures.client[message].id, '4bits')
   self.upload:pack(data, signatures.client[message])
@@ -164,6 +165,7 @@ end
 
 function client.messages.server.sync(self, data)
 	for i, player in ipairs(data.players) do
+		print(player.id .. ' is at ' .. player.x .. ', ' .. player.y .. ', ' .. player.z)
 		if player.id ~= self.id and self.players[player.id] then
 			local p = self.players[player.id]
 			p.x, p.y, p.z = player.x, player.y, player.z

@@ -38,7 +38,7 @@ function server:update(dt)
 	end
 
 	local t = lovr.timer.getTime()
-	if #self.players > 1 and (t - self.lastSync) > config.syncRate then
+	if #self.players > 1 and (t - self.lastSync) >= config.syncRate then
 		local payload = { players = {} }
 		for i = 1, config.maxPlayers do
 			if self.players[i] then
