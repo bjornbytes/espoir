@@ -243,7 +243,7 @@ function client:draw()
 						lovr.graphics.translate(0, 0, .5)
 						lovr.graphics.rotate(-fan, 0, 1, 0)
 						lovr.graphics.translate(0, 0, -.65)
-						if closest == i and closestDistance < .05 then
+						if closest == i and closestDistance < .075 then
 							lovr.graphics.translate(0, .02, 0)
 						end
 						lovr.graphics.rotate(-math.pi / 2, 1, 0, 0)
@@ -362,7 +362,7 @@ function client:controllerpressed(controller, button)
 		self.emoji.transform:rotate(unpack(self.emoji.orientation))
 	elseif controller == self.controllers[2] and button == 'trigger' then
 		local minCard, minDis, x, y, z, angle, ax, ay, az = self:getClosestCard()
-		if minCard and minDis < .05 then
+		if minCard and minDis < .075 then
 			self.cardGrab.active = true
 			self.cardGrab.card = minCard
 		end
