@@ -41,6 +41,10 @@ function client:update(dt)
 		end
 	end
 
+	if self.gameState == 'playing' then
+		self.timer = self.timer - dt
+	end
+
 	local t = lovr.timer.getTime()
   if self.state == 'server' and self.peer and (t - self.lastInput) >= config.inputRate then
     local x, y, z = lovr.headset.getPosition()
