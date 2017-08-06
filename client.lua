@@ -46,6 +46,8 @@ function client:init()
 		rotation = nil
 	}
 
+	self.proposition = 0
+
 	self.textures = {}
 	for _, emoji in ipairs(config.emoji) do
 		self.textures[emoji] = lovr.graphics.newTexture('media/emoji/' .. emoji .. '.png')
@@ -73,6 +75,13 @@ function client:update(dt)
 		if index and index ~= self.emoji.hover then
 			self.controllers[2]:vibrate(.002)
 			self.emoji.hover = index
+		end
+
+		if self.controllers[2] and self.controllers[2]:isDown('touchpad') then
+			self.proposition = self.controllers[2]:getAxis('touchy') > 0 and 1 or 2
+			self:stopGrabbingCard()
+		else
+			self.proposition = 0
 		end
 
 		local t = lovr.timer.getTime()
@@ -114,7 +123,8 @@ function client:update(dt)
 				ray = normalize(ray, 1),
 				raz = normalize(raz, 1),
 				emoji = self.emoji.current,
-				grabbedCard = self.cardGrab.card
+				grabbedCard = self.cardGrab.card,
+				proposition = self.proposition
 			})
 			self.lastInput = t
 		end
@@ -270,6 +280,18 @@ function client:draw()
 				self.models.money:draw(0, 0, 0, .2, -.2 * i, 0, 1, 1)
 				lovr.graphics.pop()
 			end
+
+			if (player.id == self.id and self.proposition > 0) or player.proposition > 0 then
+				local prop = (player.id == self.id and self.proposition) or player.proposition
+				local str = prop == 1 and 'Trade?' or 'Duel?'
+				local x, y, z = self:getControllerTransform(player, 2)
+				local hx, hy, hz = lovr.headset.getPosition()
+				local angle, ax, ay, az = lovr.math.lookAt(hx, hy, hz, x, y + .2, z)
+				lovr.graphics.sphere(x, y, z, .1, 0, 0, 0)
+				lovr.graphics.setShader()
+				lovr.graphics.print(str, x, y + .2, z, .05, angle, ax, ay, az)
+				lovr.graphics.setShader(self.shader)
+			end
 		end
 	end
 end
@@ -355,9 +377,13 @@ function client:controllerreleased(controller, button)
 		end
 		self.emoji.active = false
 	elseif controller == self.controllers[2] and button == 'trigger' and self.cardGrab.active then
-		self.cardGrab.active = false
-		self.cardGrab.card = 0
+		self:stopGrabbingCard()
 	end
+end
+
+function client:stopGrabbingCard()
+	self.cardGrab.active = false
+	self.cardGrab.card = 0
 end
 
 local tmpTransform = lovr.math.newTransform()
@@ -550,6 +576,7 @@ function client.messages.server.sync(self, data)
 			p.rangle, p.rax, p.ray, p.az = player.rangle, player.rax, player.ray, player.az
 			p.emoji = player.emoji
 			p.grabbedCard = player.grabbedCard
+			p.proposition = player.proposition
 		end
 	end
 end

@@ -156,7 +156,8 @@ function server:createPlayer(peer)
       { type = 3, position = 3 }
     },
 		emoji = 0,
-		grabbedCard = 0
+		grabbedCard = 0,
+		proposition = 0
   }
 
   return self.players[id]
@@ -224,6 +225,7 @@ function server.messages.input(self, peer, data)
   player.rangle, player.rax, player.ray, player.raz = data.rangle, data.rax, data.ray, data.raz
 	player.emoji = data.emoji
 	player.grabbedCard = data.grabbedCard
+	player.proposition = data.proposition
 end
 
 return server

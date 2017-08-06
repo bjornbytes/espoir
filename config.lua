@@ -4,8 +4,8 @@ return {
   groupSize = 1,
   bounds = 5,
   maxPlayers = 32,
-	syncRate = .016,
-	inputRate = .016,
+	syncRate = .02,
+	inputRate = .02,
 	emoji = {
 		'thumbsup',
 		'thumbsdown',
