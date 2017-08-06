@@ -96,7 +96,7 @@ function client:draw()
 		lovr.graphics.setColor(255, 255, 255)
 		if self.gameState == 'waiting' then
 			lovr.graphics.print('Waiting for contestants...', 0, 3, -5, .5)
-		elseif self.gameState == 'playign' then
+		elseif self.gameState == 'playing' then
 			local t = math.floor(self.timer)
 			local seconds = math.floor(t % 60)
 			local minutes = math.floor(t / 60)
