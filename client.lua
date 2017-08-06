@@ -139,7 +139,7 @@ function client:draw()
 		self.viewMat:rotate(lovr.headset.getOrientation())
 		self.shader:send('viewMat', self.viewMat)
 
-		self.models.table:draw(0, 1, 0)
+		--self.models.table:draw(0, 1, 0)
 
 		lovr.graphics.setColor(255, 255, 255)
 		lovr.graphics.setShader()
@@ -181,8 +181,12 @@ function client:draw()
 				lovr.graphics.setShader(self.shader)
 			else
 				if self.emoji.active then
-					local index = self:getEmojiIndex()
+					local index, px, py, pz = self:getEmojiIndex()
 					local x, y, z = self.emoji.position:unpack()
+					local cx, cy, cz = self.controllers[2]:getPosition()
+					if index > 0 then
+						lovr.graphics.line(cx, cy, cz, px, py, pz)
+					end
 					local planeSize = .5
 					local emojiPerRow = 5
 					local emojiSize = planeSize / emojiPerRow
@@ -449,7 +453,7 @@ function client:getEmojiIndex()
 	local row = 1 + math.floor((planeSize - (y + (planeSize / 2))) / emojiSize)
 	local col = 1 + math.floor((x + planeSize / 2) / emojiSize)
 	if row >= 1 and row <= math.floor(#config.emoji / emojiPerRow) and col >= 1 and col <= emojiPerRow then
-		return (row - 1) * emojiPerRow + col
+		return (row - 1) * emojiPerRow + col, p.x, p.y, p.z
 	end
 
 	return 0
