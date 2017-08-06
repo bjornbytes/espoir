@@ -137,7 +137,7 @@ function client:draw()
 		self.viewMat:origin()
 		self.viewMat:translate(lovr.headset.getPosition())
 		self.viewMat:rotate(lovr.headset.getOrientation())
-		self.shader:send('viewMat', self.viewMat)
+		self.shader:send('viewMat', self.viewMat:inverse())
 
 		--self.models.table:draw(0, 1, 0)
 
@@ -154,10 +154,11 @@ function client:draw()
 			lovr.graphics.print(minutes .. ':' .. seconds, 0, 3, -5, .5)
 		end
 
+		lovr.graphics.setShader(self.shader)
+
 		lovr.graphics.setColor(50, 50, 50)
 		lovr.graphics.plane('fill', 0, 0, 0, 10, math.pi / 2, 1, 0, 0)
 
-		lovr.graphics.setShader(self.shader)
 		lovr.graphics.setColor(255, 255, 255)
 
 		for i, player in ipairs(self.players) do
