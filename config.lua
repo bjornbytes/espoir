@@ -9,11 +9,28 @@ return {
 	emoji = {
 		'thumbsup',
 		'thumbsdown',
-		'eggplant',
 		'rockhand',
 		'paperhand',
 		'scissorshand',
 		'poop',
-		'thinking'
+		'thinking',
+		'angry',
+		'heart',
+		'star',
+		'fuckyou',
+		'cry',
+		'joy',
+		'smirk',
+		'thinking',
+		'okhand',
+		'moneybags',
+		'redquestion',
+		'pray',
+		'gg',
+		'1',
+		'2',
+		'3',
+		'wave',
+		'zzz'
 	}
 }

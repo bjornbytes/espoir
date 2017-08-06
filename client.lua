@@ -222,7 +222,7 @@ function client:draw()
 					local index = self:getEmojiIndex()
 					local x, y, z = self.emoji.position:unpack()
 					local planeSize = 1
-					local emojiPerRow = 4
+					local emojiPerRow = 5
 					local emojiSize = planeSize / emojiPerRow
 					lovr.graphics.push()
 					lovr.graphics.translate(x, y, z)
@@ -315,7 +315,7 @@ function client:getEmojiIndex()
 
 	-- Calculate row/column
 	local planeSize = 1
-	local emojiPerRow = 4
+	local emojiPerRow = 5
 	local emojiSize = planeSize / emojiPerRow
 	local row = 1 + math.floor((planeSize - (y + (planeSize / 2))) / emojiSize)
 	local col = 1 + math.floor((x + planeSize / 2) / emojiSize)
