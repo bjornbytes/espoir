@@ -12,12 +12,12 @@ local function log(...)
   print(client.state, ...)
 end
 
-local function normalize(x)
-	return math.floor(((x + config.bounds) / (2 * config.bounds)) * (2 ^ 16))
+local function normalize(x, range)
+	return math.floor(((x + range) / (2 * range)) * (2 ^ 16))
 end
 
-local function denormalize(x)
-  return ((x / (2 ^ 16)) - .5) * 2 * config.bounds
+local function denormalize(x, range)
+  return ((x / (2 ^ 16)) - .5) * 2 * range
 end
 
 function client:init()
@@ -57,27 +57,27 @@ function client:update(dt)
 		end
 
     self:send('input', {
-			x = normalize(x),
-			y = normalize(y),
-			z = normalize(z),
+			x = normalize(x, config.bounds),
+			y = normalize(y, config.bounds),
+			z = normalize(z, config.bounds),
 			angle = math.floor((angle / (2 * math.pi)) * (2 ^ 16)),
-			ax = math.floor(ax * (2 ^ 16)),
-			ay = math.floor(ay * (2 ^ 16)),
-			az = math.floor(az * (2 ^ 16)),
-			lx = normalize(lx),
-			ly = normalize(ly),
-			lz = normalize(lz),
+			ax = normalize(ax, 1),
+			ay = normalize(ay, 1),
+			az = normalize(az, 1),
+			lx = normalize(lx, config.bounds),
+			ly = normalize(ly, config.bounds),
+			lz = normalize(lz, config.bounds),
 			langle = math.floor((langle / (2 * math.pi)) * (2 ^ 16)),
-			lax = math.floor(lax * (2 ^ 16)),
-			lay = math.floor(lay * (2 ^ 16)),
-			laz = math.floor(laz * (2 ^ 16)),
-			rx = normalize(rx),
-			ry = normalize(ry),
-			rz = normalize(rz),
+			lax = normalize(lax, 1),
+			lay = normalize(lay, 1),
+			laz = normalize(laz, 1),
+			rx = normalize(rx, config.bounds),
+			ry = normalize(ry, config.bounds),
+			rz = normalize(rz, config.bounds),
 			rangle = math.floor((rangle / (2 * math.pi)) * (2 ^ 16)),
-			rax = math.floor(rax * (2 ^ 16)),
-			ray = math.floor(ray * (2 ^ 16)),
-			raz = math.floor(raz * (2 ^ 16))
+			rax = normalize(rax, 1),
+			ray = normalize(ray, 1),
+			raz = normalize(raz, 1)
 		})
 		self.lastInput = t
   end
@@ -95,16 +95,16 @@ function client:draw()
 
 		for i, player in ipairs(self.players) do
 			if player.id ~= self.id then
-				local x, y, z = denormalize(player.x), denormalize(player.y), denormalize(player.z)
-				local angle, ax, ay, az = (player.angle / (2 ^ 16)) * (2 * math.pi), player.ax / (2 ^ 16), player.ay / (2 ^ 16), player.az / (2 ^ 16)
+				local x, y, z = denormalize(player.x, config.bounds), denormalize(player.y, config.bounds), denormalize(player.z, config.bounds)
+				local angle, ax, ay, az = (player.angle / (2 ^ 16)) * (2 * math.pi), denormalize(player.ax, 1), denormalize(player.ay, 1), denormalize(player.az, 1)
 				lovr.graphics.cube('fill', x, y, z, .3, angle, ax, ay, az)
 
 				if self.controllerModel then
-					local x, y, z = player.lx, player.ly, player.lz
-					local angle, ax, ay, az = player.langle, player.lax, player.lay, player.laz
+					local x, y, z = denormalize(player.lx, config.bounds), denormalize(player.ly, config.bounds), denormalize(player.lz, config.bounds)
+					local angle, ax, ay, az = player.langle, denormalize(player.lax, 1), denormalize(player.lay, 1), denormalize(player.laz, 1)
 					self.controllerModel:draw(x, y, z, 1, angle, ax, ay, az)
 					local x, y, z = player.rx, player.ry, player.rz
-					local angle, ax, ay, az = player.rangle, player.rax, player.ray, player.raz
+					local angle, ax, ay, az = player.rangle, denormalize(player.rax, 1), denormalize(player.ray, 1), denormalize(player.raz, 1)
 					self.controllerModel:draw(x, y, z, 1, angle, ax, ay, az)
 				end
 			else
