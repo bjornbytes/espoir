@@ -51,7 +51,8 @@ signatures.server = {
   join = {
     id = 1,
     { 'id', '8bits' },
-		{ 'state', 'string' }
+		{ 'state', 'string' },
+		{ 'timer', 'float' }
   },
 
   'player',
@@ -119,7 +120,8 @@ signatures.server = {
 	'gamestate',
 	gamestate = {
 		id = 4,
-		{ 'state', 'string' }
+		{ 'state', 'string' },
+		{ 'timer', 'float' }
 	}
 }
 
