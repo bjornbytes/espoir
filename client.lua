@@ -38,6 +38,10 @@ function client:init()
 		star = lovr.graphics.newModel('media/star.obj', 'media/star-tex.png'),
 		money = lovr.graphics.newModel('media/moneystack.obj', 'media/money-tex.jpg')
 	}
+	self.grab = {
+		active = false,
+		position = 0
+	}
 
 	self.textures = {}
 	for _, emoji in ipairs(config.emoji) do
@@ -221,7 +225,7 @@ function client:draw()
 				if self.emoji.active then
 					local index = self:getEmojiIndex()
 					local x, y, z = self.emoji.position:unpack()
-					local planeSize = 1
+					local planeSize = .5
 					local emojiPerRow = 5
 					local emojiSize = planeSize / emojiPerRow
 					lovr.graphics.push()
@@ -314,7 +318,7 @@ function client:getEmojiIndex()
 	local x, y, z = self.emoji.transform:inverseTransformPoint(p.x, p.y, p.z)
 
 	-- Calculate row/column
-	local planeSize = 1
+	local planeSize = .5
 	local emojiPerRow = 5
 	local emojiSize = planeSize / emojiPerRow
 	local row = 1 + math.floor((planeSize - (y + (planeSize / 2))) / emojiSize)
