@@ -101,10 +101,10 @@ function client:draw()
 
 				if self.controllerModel then
 					local x, y, z = denormalize(player.lx, config.bounds), denormalize(player.ly, config.bounds), denormalize(player.lz, config.bounds)
-					local angle, ax, ay, az = player.langle, denormalize(player.lax, 1), denormalize(player.lay, 1), denormalize(player.laz, 1)
+					local angle, ax, ay, az = (player.langle / (2 ^ 16)) * (2 * math.pi), denormalize(player.lax, 1), denormalize(player.lay, 1), denormalize(player.laz, 1)
 					self.controllerModel:draw(x, y, z, 1, angle, ax, ay, az)
-					local x, y, z = player.rx, player.ry, player.rz
-					local angle, ax, ay, az = player.rangle, denormalize(player.rax, 1), denormalize(player.ray, 1), denormalize(player.raz, 1)
+					local x, y, z = denormalize(player.rx, config.bounds), denormalize(player.ry, config.bounds), denormalize(player.rz, config.bounds)
+					local angle, ax, ay, az = (player.rangle / (2 ^ 16)) * (2 * math.pi), denormalize(player.rax, 1), denormalize(player.ray, 1), denormalize(player.raz, 1)
 					self.controllerModel:draw(x, y, z, 1, angle, ax, ay, az)
 				end
 			else
