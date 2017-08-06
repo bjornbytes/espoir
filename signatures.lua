@@ -34,7 +34,8 @@ signatures.client = {
     { 'rangle', '16bits' },
     { 'rax', '16bits' },
     { 'ray', '16bits' },
-    { 'raz', '16bits' }
+    { 'raz', '16bits' },
+		{ 'emoji', '8bits' }
   }
 }
 
@@ -83,7 +84,8 @@ signatures.server = {
     { 'raz', '16bits' },
     { 'stars', '4bits' },
     { 'money', '8bits' },
-    { 'cards', { { 'type', '2bits' }, { 'position', '4bits' } } }
+    { 'cards', { { 'type', '2bits' }, { 'position', '4bits' } } },
+		{ 'emoji', '8bits' }
   },
 
   'sync',
@@ -112,7 +114,8 @@ signatures.server = {
 				{ 'rangle', '16bits' },
 				{ 'rax', '16bits' },
 				{ 'ray', '16bits' },
-				{ 'raz', '16bits' }
+				{ 'raz', '16bits' },
+				{ 'emoji', '8bits' }
       }
     }
   },

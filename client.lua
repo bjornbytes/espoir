@@ -9,7 +9,7 @@ local quat = maf.quat
 local client = {}
 
 local function log(...)
-  print(client.state, ...)
+  --print(client.state, ...)
 end
 
 local function normalize(x, range)
@@ -23,13 +23,29 @@ end
 function client:init()
   self:reset()
 	self:refreshControllers()
+	self.emoji = {
+		active = false,
+		current = 0,
+		hover = 0,
+		transform = lovr.math.newTransform()
+	}
 	self.lastInput = lovr.timer.getTime()
 	self.models = {
 		head = lovr.graphics.newModel('media/head.obj', 'media/head-tex.png'),
 		rock = lovr.graphics.newModel('media/rock-card.obj', 'media/rock-tex.png'),
 		paper = lovr.graphics.newModel('media/paper-card.obj', 'media/paper-tex.png'),
-		scissors = lovr.graphics.newModel('media/scissor-card.obj', 'media/scissor-tex.png')
+		scissors = lovr.graphics.newModel('media/scissor-card.obj', 'media/scissor-tex.png'),
+		star = lovr.graphics.newModel('media/star.obj', 'media/star-tex.png'),
+		money = lovr.graphics.newModel('media/moneystack.obj', 'media/money-tex.jpg')
 	}
+
+	self.textures = {}
+	for _, emoji in ipairs(config.emoji) do
+		self.textures[emoji] = lovr.graphics.newTexture('media/emoji/' .. emoji .. '.png')
+	end
+
+	self.shader = require('media/shader')
+	self.viewMat = lovr.math.newTransform()
 end
 
 function client:update(dt)
@@ -41,59 +57,71 @@ function client:update(dt)
 		end
 	end
 
-	if self.gameState == 'playing' then
-		self.timer = self.timer - dt
+	if self.state == 'server' then
+		if self.gameState == 'playing' then
+			self.timer = self.timer - dt
+		end
+
+		local index = self.emoji.active and self:getEmojiIndex()
+		if index and index ~= self.emoji.hover then
+			self.controllers[2]:vibrate(.002)
+			self.emoji.hover = index
+		end
+
+		local t = lovr.timer.getTime()
+		if self.state == 'server' and self.peer and (t - self.lastInput) >= config.inputRate then
+			local x, y, z = lovr.headset.getPosition()
+			local angle, ax, ay, az = lovr.headset.getOrientation()
+			local lx, ly, lz, rx, ry, rz, langle, lax, lay, laz, rangle, rax, ray, raz = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+			if self.controllers[1] then
+				lx, ly, lz = self.controllers[1]:getPosition()
+				langle, lax, lay, laz = self.controllers[1]:getOrientation()
+			end
+
+			if self.controllers[2] then
+				rx, ry, rz = self.controllers[2]:getPosition()
+				rangle, rax, ray, raz = self.controllers[2]:getOrientation()
+			end
+
+			self:send('input', {
+				x = normalize(x, config.bounds),
+				y = normalize(y, config.bounds),
+				z = normalize(z, config.bounds),
+				angle = math.floor((angle / (2 * math.pi)) * (2 ^ 16)),
+				ax = normalize(ax, 1),
+				ay = normalize(ay, 1),
+				az = normalize(az, 1),
+				lx = normalize(lx, config.bounds),
+				ly = normalize(ly, config.bounds),
+				lz = normalize(lz, config.bounds),
+				langle = math.floor((langle / (2 * math.pi)) * (2 ^ 16)),
+				lax = normalize(lax, 1),
+				lay = normalize(lay, 1),
+				laz = normalize(laz, 1),
+				rx = normalize(rx, config.bounds),
+				ry = normalize(ry, config.bounds),
+				rz = normalize(rz, config.bounds),
+				rangle = math.floor((rangle / (2 * math.pi)) * (2 ^ 16)),
+				rax = normalize(rax, 1),
+				ray = normalize(ray, 1),
+				raz = normalize(raz, 1),
+				emoji = self.emoji.current
+			})
+			self.lastInput = t
+		end
 	end
-
-	local t = lovr.timer.getTime()
-  if self.state == 'server' and self.peer and (t - self.lastInput) >= config.inputRate then
-    local x, y, z = lovr.headset.getPosition()
-    local angle, ax, ay, az = lovr.headset.getOrientation()
-		local lx, ly, lz, rx, ry, rz, langle, lax, lay, laz, rangle, rax, ray, raz = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-
-		if self.controllers[1] then
-			lx, ly, lz = self.controllers[1]:getPosition()
-			langle, lax, lay, laz = self.controllers[1]:getOrientation()
-		end
-
-		if self.controllers[2] then
-			rx, ry, rz = self.controllers[2]:getPosition()
-			rangle, rax, ray, raz = self.controllers[2]:getOrientation()
-		end
-
-    self:send('input', {
-			x = normalize(x, config.bounds),
-			y = normalize(y, config.bounds),
-			z = normalize(z, config.bounds),
-			angle = math.floor((angle / (2 * math.pi)) * (2 ^ 16)),
-			ax = normalize(ax, 1),
-			ay = normalize(ay, 1),
-			az = normalize(az, 1),
-			lx = normalize(lx, config.bounds),
-			ly = normalize(ly, config.bounds),
-			lz = normalize(lz, config.bounds),
-			langle = math.floor((langle / (2 * math.pi)) * (2 ^ 16)),
-			lax = normalize(lax, 1),
-			lay = normalize(lay, 1),
-			laz = normalize(laz, 1),
-			rx = normalize(rx, config.bounds),
-			ry = normalize(ry, config.bounds),
-			rz = normalize(rz, config.bounds),
-			rangle = math.floor((rangle / (2 * math.pi)) * (2 ^ 16)),
-			rax = normalize(rax, 1),
-			ray = normalize(ray, 1),
-			raz = normalize(raz, 1)
-		})
-		self.lastInput = t
-  end
 end
 
 function client:draw()
 	if self.state == 'server' then
-		lovr.graphics.setColor(50, 50, 50)
-		lovr.graphics.plane('fill', 0, 0, 0, 10, math.pi / 2, 1, 0, 0)
+		self.viewMat:origin()
+		self.viewMat:translate(lovr.headset.getPosition())
+		self.viewMat:rotate(lovr.headset.getOrientation())
+		self.shader:send('viewMat', self.viewMat)
 
 		lovr.graphics.setColor(255, 255, 255)
+		lovr.graphics.setShader()
 		if self.gameState == 'waiting' then
 			lovr.graphics.print('Waiting for contestants...', 0, 3, -5, .5)
 		elseif self.gameState == 'playing' then
@@ -105,11 +133,26 @@ function client:draw()
 			lovr.graphics.print(minutes .. ':' .. seconds, 0, 3, -5, .5)
 		end
 
+		lovr.graphics.setColor(50, 50, 50)
+		lovr.graphics.plane('fill', 0, 0, 0, 10, math.pi / 2, 1, 0, 0)
+
+		lovr.graphics.setShader(self.shader)
+		lovr.graphics.setColor(255, 255, 255)
+
 		for i, player in ipairs(self.players) do
 			if player.id ~= self.id then
 				local x, y, z = denormalize(player.x, config.bounds), denormalize(player.y, config.bounds), denormalize(player.z, config.bounds)
 				local angle, ax, ay, az = (player.angle / (2 ^ 16)) * (2 * math.pi), denormalize(player.ax, 1), denormalize(player.ay, 1), denormalize(player.az, 1)
 				self.models.head:draw(x, y, z, 1, angle, ax, ay, az)
+
+				if player.emoji > 0 then
+					local emojiSize = .08
+					lovr.graphics.push()
+					lovr.graphics.translate(x, y, z)
+					lovr.graphics.rotate(angle, ax, ay, az)
+					lovr.graphics.plane(self.textures[player.emoji], 0, 0, -.01, emojiSize)
+					lovr.graphics.pop()
+				end
 
 				if self.controllerModel then
 					local x, y, z = denormalize(player.lx, config.bounds), denormalize(player.ly, config.bounds), denormalize(player.lz, config.bounds)
@@ -153,17 +196,69 @@ function client:draw()
 						lovr.graphics.pop()
 						fan = fan + spread
 					end
+
+					for i = 1, player.stars do
+						lovr.graphics.push()
+						lovr.graphics.translate(self.controllers[1]:getPosition())
+						lovr.graphics.rotate(self.controllers[1]:getOrientation())
+						lovr.graphics.translate(0, 0, .1 * i)
+						lovr.graphics.translate(-.05, 0, 0)
+						self.models.star:draw(0, 0, 0, 1, math.pi / 2, 0, 0, 1)
+						lovr.graphics.pop()
+					end
+
+					for i = 1, player.money do
+						lovr.graphics.push()
+						lovr.graphics.translate(self.controllers[1]:getPosition())
+						lovr.graphics.rotate(self.controllers[1]:getOrientation())
+						lovr.graphics.translate(0, 0, .1)
+						lovr.graphics.translate(.03 * i, 0, 0)
+						self.models.money:draw(0, 0, 0, .2, math.pi / 2, 0, 0, 1)
+						lovr.graphics.pop()
+					end
+				end
+
+				if self.emoji.active then
+					local index = self:getEmojiIndex()
+					local x, y, z = self.emoji.position:unpack()
+					local planeSize = 1
+					local emojiPerRow = 4
+					local emojiSize = planeSize / emojiPerRow
+					lovr.graphics.push()
+					lovr.graphics.translate(x, y, z)
+					lovr.graphics.rotate(unpack(self.emoji.orientation))
+					lovr.graphics.setColor(20, 20, 20)
+					lovr.graphics.plane('fill', 0, 0, 0, planeSize)
+					lovr.graphics.setColor(255, 255, 255)
+					for i, emoji in ipairs(config.emoji) do
+						if i ~= index then
+							local x = -planeSize / 2 + emojiSize / 2 + emojiSize * ((i - 1) % emojiPerRow)
+							local y = planeSize / 2 - emojiSize / 2 - emojiSize * math.floor((i - 1) / emojiPerRow)
+							lovr.graphics.plane(self.textures[emoji], x, y, .01, emojiSize)
+						end
+					end
+					for i, emoji in ipairs(config.emoji) do
+						if i == index then
+							local x = -planeSize / 2 + emojiSize / 2 + emojiSize * ((i - 1) % emojiPerRow)
+							local y = planeSize / 2 - emojiSize / 2 - emojiSize * math.floor((i - 1) / emojiPerRow)
+							lovr.graphics.plane(self.textures[emoji], x, y, .03, emojiSize)
+						end
+					end
+					lovr.graphics.pop()
 				end
 			end
 		end
 	end
 
+	lovr.graphics.setColor(255, 255, 255)
 	if self.controllerModel then
 		for i, controller in ipairs(self.controllers) do
 			local x, y, z = controller:getPosition()
 			self.controllerModel:draw(x, y, z, 1, controller:getOrientation())
 		end
 	end
+
+	lovr.graphics.setShader()
 end
 
 function client:quit()
@@ -179,6 +274,56 @@ end
 
 function client:controllerremoved()
 	self:refreshControllers()
+end
+
+function client:controllerpressed(controller, button)
+	if controller == self.controllers[2] and button == 'menu' then
+		self.emoji.active = true
+		self.emoji.vector = vec3(0, 0, -1):rotate(quat():angleAxis(self.controllers[2]:getOrientation()))
+		self.emoji.vector.y = 0
+		self.emoji.vector:normalize()
+		self.emoji.position = vec3(self.controllers[2]:getPosition()) + self.emoji.vector * .1
+		self.emoji.orientation = { quat():between(vec3(0, 0, -1), self.emoji.vector):getAngleAxis() }
+
+		self.emoji.transform:origin()
+		self.emoji.transform:translate(self.emoji.position:unpack())
+		self.emoji.transform:rotate(unpack(self.emoji.orientation))
+	end
+end
+
+function client:controllerreleased(controller, button)
+	if controller == self.controllers[2] and button == 'menu' and self.emoji.active == true then
+		self.emoji.active = false
+		local index = self:getEmojiIndex()
+		if index and index > 0 then
+			self.emoji.current = index
+		end
+	end
+end
+
+function client:getEmojiIndex()
+	if not self.emoji.active then return end
+
+	-- Project controller onto emoji plane
+	local v = vec3(self.controllers[2]:getPosition()) - self.emoji.position
+	local n = -self.emoji.vector:normalize()
+	local dist = v:dot(n)
+	local p = (vec3(self.controllers[2]:getPosition()) - n:scale(dist))
+
+	-- Transform into emojiplane-space
+	local x, y, z = self.emoji.transform:inverseTransformPoint(p.x, p.y, p.z)
+
+	-- Calculate row/column
+	local planeSize = 1
+	local emojiPerRow = 4
+	local emojiSize = planeSize / emojiPerRow
+	local row = 1 + math.floor((planeSize - (y + (planeSize / 2))) / emojiSize)
+	local col = 1 + math.floor((x + planeSize / 2) / emojiSize)
+	if row >= 1 and row <= math.floor(#config.emoji / emojiPerRow) and col >= 1 and col <= emojiPerRow then
+		return (row - 1) * emojiPerRow + col
+	end
+
+	return 0
 end
 
 function client:refreshControllers()
@@ -313,6 +458,7 @@ function client.messages.server.sync(self, data)
 			p.langle, p.lax, p.lay, p.az = player.langle, player.lax, player.lay, player.az
 			p.rx, p.ry, p.rz = player.rx, player.ry, player.rz
 			p.rangle, p.rax, p.ray, p.az = player.rangle, player.rax, player.ray, player.az
+			p.emoji = player.emoji
 		end
 	end
 end

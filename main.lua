@@ -31,3 +31,11 @@ end
 function lovr.controllerremoved(...)
 	if controller.controllerremoved then controller:controllerremoved(...) end
 end
+
+function lovr.controllerpressed(...)
+	if controller.controllerpressed then controller:controllerpressed(...) end
+end
+
+function lovr.controllerreleased(...)
+	if controller.controllerreleased then controller:controllerreleased(...) end
+end
