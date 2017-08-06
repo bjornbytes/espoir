@@ -40,6 +40,7 @@ function client:init()
 	}
 	self.cardGrab = {
 		active = false,
+		card = 0,
 		position = 0,
 		offset = nil,
 		rotation = nil
@@ -113,7 +114,7 @@ function client:update(dt)
 				ray = normalize(ray, 1),
 				raz = normalize(raz, 1),
 				emoji = self.emoji.current,
-				grabbedCard = self.cardGrab.position
+				grabbedCard = self.cardGrab.card
 			})
 			self.lastInput = t
 		end
@@ -250,6 +251,8 @@ function client:draw()
 				end
 			end
 
+			lovr.graphics.setColor(255, 255, 255)
+
 			for i = 1, player.stars do
 				local x, y, z, angle, ax, ay, az = self:getControllerTransform(player, 1)
 				lovr.graphics.push()
@@ -266,11 +269,10 @@ function client:draw()
 				lovr.graphics.push()
 				lovr.graphics.translate(x, y, z)
 				lovr.graphics.rotate(angle, ax, ay, az)
-				lovr.graphics.translate(0, 0, .01 + .015 * i)
-				lovr.graphics.translate(.12 + .01 * (i - 1), 0, 0)
-				lovr.graphics.rotate(math.pi / 2, 1, 0, 0)
-				lovr.graphics.rotate(math.pi / 2, 0, 0, 1)
-				self.models.money:draw(0, 0, 0, .2, -.1 * i, 0, 1, 0)
+				lovr.graphics.translate(.15, 0, .08)
+				lovr.graphics.translate(-.005 * (i - 1), -.01 * (i - 1), 0, 0)
+				lovr.graphics.rotate(math.pi / 2, 0, 1, 0)
+				self.models.money:draw(0, 0, 0, .2, -.2 * i, 0, 1, 1)
 				lovr.graphics.pop()
 			end
 		end
@@ -299,7 +301,7 @@ function client:drawCard(player, cardIndex, ...)
 	local card = player.cards[cardIndex]
 	if card.position <= 0 then return end
 
-	if player.id == self.id then
+	if player.id == self.id or cardIndex == player.grabbedCard then
 		lovr.graphics.setColor(255, 255, 255)
 	else
 		lovr.graphics.setColor(0, 0, 0)
