@@ -9,7 +9,7 @@ return {
 	emoji = {
 		'thumbsup',
 		'thumbsdown',
-		'thinking',
+		'eggplant',
 		'rockhand',
 		'paperhand',
 		'scissorshand',

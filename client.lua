@@ -146,11 +146,12 @@ function client:draw()
 				self.models.head:draw(x, y, z, 1, angle, ax, ay, az)
 
 				if player.emoji > 0 then
+					print('emoji', player.emoji)
 					local emojiSize = .08
 					lovr.graphics.push()
 					lovr.graphics.translate(x, y, z)
 					lovr.graphics.rotate(angle, ax, ay, az)
-					lovr.graphics.plane(self.textures[player.emoji], 0, 0, -.01, emojiSize)
+					lovr.graphics.plane(self.textures[player.emoji], 0, 0, .01, emojiSize)
 					lovr.graphics.pop()
 				end
 
