@@ -117,9 +117,32 @@ function server:createPlayer(peer)
 		ax = 0,
 		ay = 0,
 		az = 0,
+		lx = 0,
+		ly = 0,
+		lz = 0,
+		langle = 0,
+		lax = 0,
+		lay = 0,
+		laz = 0,
+		rx = 0,
+		ry = 0,
+		rz = 0,
+		rangle = 0,
+		rax = 0,
+		ray = 0,
+		raz = 0,
     stars = 3,
     money = 10,
     cards = {
+      { type = 1, position = 1 },
+      { type = 2, position = 2 },
+      { type = 3, position = 3 },
+      { type = 1, position = 1 },
+      { type = 2, position = 2 },
+      { type = 3, position = 3 },
+      { type = 1, position = 1 },
+      { type = 2, position = 2 },
+      { type = 3, position = 3 },
       { type = 1, position = 1 },
       { type = 2, position = 2 },
       { type = 3, position = 3 }
@@ -165,14 +188,17 @@ function server.messages.join(self, peer, data)
   self:broadcast('player', player)
 	local count = 0
 	for i = 1, config.maxPlayers do
-		if self.players[i] and i ~= player.id then
+		if self.players[i] then
 			count = count + 1
-			self:send(peer, 'player', self.players[i])
+			if i ~= player.id then
+				self:send(peer, 'player', self.players[i])
+			end
 		end
 	end
 
 	if self.gameState == 'waiting' and count >= config.groupSize then
 		self.gameState = 'playing'
+		print('oh state yeah')
 		self:broadcast('gamestate', { state = self.gameState })
 	end
 end
@@ -182,6 +208,10 @@ function server.messages.input(self, peer, data)
   local player = self.players[self.players[peer]]
   player.x, player.y, player.z = data.x, data.y, data.z
   player.angle, player.ax, player.ay, player.az = data.angle, data.ax, data.ay, data.az
+  player.lx, player.ly, player.lz = data.lx, data.ly, data.lz
+  player.langle, player.lax, player.lay, player.laz = data.langle, data.lax, data.lay, data.laz
+  player.rx, player.ry, player.rz = data.rx, data.ry, data.rz
+  player.rangle, player.rax, player.ray, player.raz = data.lx, data.ly, data.lz
 end
 
 return server

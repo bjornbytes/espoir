@@ -25,9 +25,9 @@ function client:init()
 	self:refreshControllers()
 	self.lastInput = lovr.timer.getTime()
 	self.models = {
-		rock = lovr.graphics.newModel('media/rock-card.obj', 'media/rock-side.png'),
-		paper = lovr.graphics.newModel('media/paper-card.obj', 'media/paper-side.png'),
-		scissors = lovr.graphics.newModel('media/scissor-card.obj', 'media/scissor-side.png')
+		rock = lovr.graphics.newModel('media/rock-card.obj', 'media/rock-tex.png'),
+		paper = lovr.graphics.newModel('media/paper-card.obj', 'media/paper-tex.png'),
+		scissors = lovr.graphics.newModel('media/scissor-card.obj', 'media/scissor-tex.png')
 	}
 end
 
@@ -44,6 +44,18 @@ function client:update(dt)
   if self.state == 'server' and self.peer and (t - self.lastInput) >= config.inputRate then
     local x, y, z = lovr.headset.getPosition()
     local angle, ax, ay, az = lovr.headset.getOrientation()
+		local lx, ly, lz, rx, ry, rz, langle, lax, lay, laz, rangle, rax, ray, raz = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+		if self.controllers[1] then
+			lx, ly, lz = self.controllers[1]:getPosition()
+			langle, lax, lay, laz = self.controllers[1]:getOrientation()
+		end
+
+		if self.controllers[2] then
+			rx, ry, rz = self.controllers[2]:getPosition()
+			rangle, rax, ray, raz = self.controllers[2]:getOrientation()
+		end
+
     self:send('input', {
 			x = normalize(x),
 			y = normalize(y),
@@ -51,7 +63,21 @@ function client:update(dt)
 			angle = math.floor((angle / (2 * math.pi)) * (2 ^ 16)),
 			ax = math.floor(ax * (2 ^ 16)),
 			ay = math.floor(ay * (2 ^ 16)),
-			az = math.floor(az * (2 ^ 16))
+			az = math.floor(az * (2 ^ 16)),
+			lx = normalize(lx),
+			ly = normalize(ly),
+			lz = normalize(lz),
+			langle = math.floor((langle / (2 * math.pi)) * (2 ^ 16)),
+			rax = math.floor(rax * (2 ^ 16)),
+			ray = math.floor(ray * (2 ^ 16)),
+			raz = math.floor(raz * (2 ^ 16)),
+			rx = normalize(rx),
+			ry = normalize(ry),
+			rz = normalize(rz),
+			rangle = math.floor((rangle / (2 * math.pi)) * (2 ^ 16)),
+			rax = math.floor(rax * (2 ^ 16)),
+			ray = math.floor(ray * (2 ^ 16)),
+			raz = math.floor(raz * (2 ^ 16))
 		})
 		self.lastInput = t
   end
@@ -80,7 +106,7 @@ function client:draw()
 						end
 					end
 
-					local spread = .1
+					local spread = .075
 					local fan = -(cardCount - 1) / 2 * spread
 					for i, card in ipairs(player.cards) do
 						local x, y, z = self.controllers[1]:getPosition()
@@ -89,9 +115,18 @@ function client:draw()
 						lovr.graphics.translate(x, y, z)
 						lovr.graphics.rotate(angle, ax, ay, az)
 						lovr.graphics.push()
-						lovr.graphics.rotate(fan, 0, 1, 0)
-						lovr.graphics.translate(0, 0, -.2)
-						self.models.rock:draw(0, 0, 0, 1, math.pi / 2, 1, 1, 0)
+						lovr.graphics.translate(0, 0, .5)
+						lovr.graphics.rotate(-fan, 0, 1, 0)
+						lovr.graphics.translate(0, 0, -.65)
+						lovr.graphics.rotate(-math.pi / 2, 1, 0, 0)
+						lovr.graphics.rotate(.1, 0, 1, 0)
+						if card.type == 1 then
+							self.models.rock:draw(0, 0, 0, .5)
+						elseif card.type == 2 then
+							self.models.paper:draw(0, 0, 0, .5)
+						elseif card.type == 3 then
+							self.models.scissors:draw(0, 0, 0, .5)
+						end
 						lovr.graphics.pop()
 						lovr.graphics.pop()
 						fan = fan + spread
@@ -250,6 +285,11 @@ function client.messages.server.sync(self, data)
 		if player.id ~= self.id and self.players[player.id] then
 			local p = self.players[player.id]
 			p.x, p.y, p.z = player.x, player.y, player.z
+			p.angle, p.ax, p.ay, p.az = player.angle, player.ax, player.ay, player.az
+			p.lx, p.ly, p.lz = player.lx, player.ly, player.lz
+			p.langle, p.lax, p.lay, p.az = player.langle, player.lax, player.lay, player.az
+			p.rx, p.ry, p.rz = prayer.rx, prayer.ry, prayer.rz
+			p.rangle, p.rax, p.ray, p.az = player.rangle, player.rax, player.ray, player.az
 		end
 	end
 end
