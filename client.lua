@@ -38,9 +38,11 @@ function client:init()
 		star = lovr.graphics.newModel('media/star.obj', 'media/star-tex.png'),
 		money = lovr.graphics.newModel('media/moneystack.obj', 'media/money-tex.jpg')
 	}
-	self.grab = {
+	self.cardGrab = {
 		active = false,
-		position = 0
+		position = 0,
+		offset = nil,
+		rotation = nil
 	}
 
 	self.textures = {}
@@ -110,7 +112,8 @@ function client:update(dt)
 				rax = normalize(rax, 1),
 				ray = normalize(ray, 1),
 				raz = normalize(raz, 1),
-				emoji = self.emoji.current
+				emoji = self.emoji.current,
+				grabbedCard = self.cardGrab.position
 			})
 			self.lastInput = t
 		end
@@ -158,68 +161,9 @@ function client:draw()
 					lovr.graphics.pop()
 				end
 
-				if self.controllerModel then
-					local x, y, z = denormalize(player.lx, config.bounds), denormalize(player.ly, config.bounds), denormalize(player.lz, config.bounds)
-					local angle, ax, ay, az = (player.langle / (2 ^ 16)) * (2 * math.pi), denormalize(player.lax, 1), denormalize(player.lay, 1), denormalize(player.laz, 1)
-					self.controllerModel:draw(x, y, z, 1, angle, ax, ay, az)
-					local x, y, z = denormalize(player.rx, config.bounds), denormalize(player.ry, config.bounds), denormalize(player.rz, config.bounds)
-					local angle, ax, ay, az = (player.rangle / (2 ^ 16)) * (2 * math.pi), denormalize(player.rax, 1), denormalize(player.ray, 1), denormalize(player.raz, 1)
-					self.controllerModel:draw(x, y, z, 1, angle, ax, ay, az)
-				end
+				-- todo this could use self:getControllerTransform
 			else
 				if self.controllers[1] then
-					local cardCount = 0
-					for i, card in ipairs(player.cards) do
-						if card.position > 0 then
-							cardCount = cardCount + 1
-						end
-					end
-
-					local spread = .075
-					local fan = -(cardCount - 1) / 2 * spread
-					for i, card in ipairs(player.cards) do
-						local x, y, z = self.controllers[1]:getPosition()
-						local angle, ax, ay, az = self.controllers[1]:getOrientation()
-						lovr.graphics.push()
-						lovr.graphics.translate(x, y, z)
-						lovr.graphics.rotate(angle, ax, ay, az)
-						lovr.graphics.push()
-						lovr.graphics.translate(0, 0, .5)
-						lovr.graphics.rotate(-fan, 0, 1, 0)
-						lovr.graphics.translate(0, 0, -.65)
-						lovr.graphics.rotate(-math.pi / 2, 1, 0, 0)
-						lovr.graphics.rotate(.1, 0, 1, 0)
-						if card.type == 1 then
-							self.models.rock:draw(0, 0, 0, .5)
-						elseif card.type == 2 then
-							self.models.paper:draw(0, 0, 0, .5)
-						elseif card.type == 3 then
-							self.models.scissors:draw(0, 0, 0, .5)
-						end
-						lovr.graphics.pop()
-						lovr.graphics.pop()
-						fan = fan + spread
-					end
-
-					for i = 1, player.stars do
-						lovr.graphics.push()
-						lovr.graphics.translate(self.controllers[1]:getPosition())
-						lovr.graphics.rotate(self.controllers[1]:getOrientation())
-						lovr.graphics.translate(0, 0, .1 * i)
-						lovr.graphics.translate(-.05, 0, 0)
-						self.models.star:draw(0, 0, 0, 1, math.pi / 2, 0, 0, 1)
-						lovr.graphics.pop()
-					end
-
-					for i = 1, player.money do
-						lovr.graphics.push()
-						lovr.graphics.translate(self.controllers[1]:getPosition())
-						lovr.graphics.rotate(self.controllers[1]:getOrientation())
-						lovr.graphics.translate(0, 0, .1)
-						lovr.graphics.translate(.03 * i, 0, 0)
-						self.models.money:draw(0, 0, 0, .2, math.pi / 2, 0, 0, 1)
-						lovr.graphics.pop()
-					end
 				end
 
 				if self.emoji.active then
@@ -251,18 +195,123 @@ function client:draw()
 					lovr.graphics.pop()
 				end
 			end
+
+			if self.controllerModel then
+				local x, y, z, angle, ax, ay, az = self:getControllerTransform(player, 1)
+				self.controllerModel:draw(x, y, z, 1, angle, ax, ay, az)
+				local x, y, z, angle, ax, ay, az = self:getControllerTransform(player, 2)
+				self.controllerModel:draw(x, y, z, 1, angle, ax, ay, az)
+			end
+
+			local cardCount = 0
+			for i, card in ipairs(player.cards) do
+				if card.position > 0 then
+					cardCount = cardCount + 1
+				end
+			end
+
+			local spread = .075
+			local fan = -(cardCount - 1) / 2 * spread
+			local closest, closestDistance
+			if player.id == self.id then
+				closest, closestDistance = self:getClosestCard()
+			end
+
+			for i, card in ipairs(player.cards) do
+				if player.cards[i].position > 0 then
+					if (player.id == self.id and self.cardGrab.active and self.cardGrab.card == i) or (player.grabbedCard == i) then
+						local x, y, z, angle, ax, ay, az = self:getControllerTransform(player, 2)
+						lovr.graphics.push()
+						lovr.graphics.translate(x, y, z)
+						lovr.graphics.rotate(angle, ax, ay, az)
+						lovr.graphics.translate(0, .05, -.05)
+						lovr.graphics.rotate(-math.pi / 4, 1, 0, 0)
+						self:drawCard(player, i, 0, 0, 0, .5)
+						lovr.graphics.pop()
+					else
+						local x, y, z, angle, ax, ay, az = self:getControllerTransform(player, 1)
+						lovr.graphics.push()
+						lovr.graphics.translate(x, y, z)
+						lovr.graphics.rotate(angle, ax, ay, az)
+						lovr.graphics.push()
+						lovr.graphics.translate(0, 0, .5)
+						lovr.graphics.rotate(-fan, 0, 1, 0)
+						lovr.graphics.translate(0, 0, -.65)
+						if closest == i and closestDistance < .05 then
+							lovr.graphics.translate(0, .02, 0)
+						end
+						lovr.graphics.rotate(-math.pi / 2, 1, 0, 0)
+						lovr.graphics.rotate(.1, 0, 1, 0)
+						self:drawCard(player, i, 0, 0, 0, .5)
+						lovr.graphics.pop()
+						lovr.graphics.pop()
+					end
+					fan = fan + spread
+				end
+			end
+
+			for i = 1, player.stars do
+				local x, y, z, angle, ax, ay, az = self:getControllerTransform(player, 1)
+				lovr.graphics.push()
+				lovr.graphics.translate(x, y, z)
+				lovr.graphics.rotate(angle, ax, ay, az)
+				lovr.graphics.translate(0, 0, .075 * (i - 1))
+				lovr.graphics.translate(-.15 + math.min(.02 * (i - 1), .1), 0, 0)
+				self.models.star:draw(0, 0, 0, 1, math.pi / 4, 0, 0, 1)
+				lovr.graphics.pop()
+			end
+
+			for i = 1, player.money do
+				local x, y, z, angle, ax, ay, az = self:getControllerTransform(player, 1)
+				lovr.graphics.push()
+				lovr.graphics.translate(x, y, z)
+				lovr.graphics.rotate(angle, ax, ay, az)
+				lovr.graphics.translate(0, 0, .01 + .015 * i)
+				lovr.graphics.translate(.12 + .01 * (i - 1), 0, 0)
+				lovr.graphics.rotate(math.pi / 2, 1, 0, 0)
+				lovr.graphics.rotate(math.pi / 2, 0, 0, 1)
+				self.models.money:draw(0, 0, 0, .2, -.1 * i, 0, 1, 0)
+				lovr.graphics.pop()
+			end
 		end
 	end
+end
 
-	lovr.graphics.setColor(255, 255, 255)
-	if self.controllerModel then
-		for i, controller in ipairs(self.controllers) do
-			local x, y, z = controller:getPosition()
-			self.controllerModel:draw(x, y, z, 1, controller:getOrientation())
+function client:getControllerTransform(player, index)
+	if player.id == self.id then
+		if not self.controllers[index] then return 0, 0, 0, 0, 0, 0, 0 end
+		local x, y, z = self.controllers[index]:getPosition()
+		return x, y, z, self.controllers[index]:getOrientation()
+	else
+		if index == 1 then
+			local x, y, z = denormalize(player.lx, config.bounds), denormalize(player.ly, config.bounds), denormalize(player.lz, config.bounds)
+			local angle, ax, ay, az = (player.langle / (2 ^ 16)) * (2 * math.pi), denormalize(player.lax, 1), denormalize(player.lay, 1), denormalize(player.laz, 1)
+			return x, y, z, angle, ax, ay, az
+		else
+			local x, y, z = denormalize(player.rx, config.bounds), denormalize(player.ry, config.bounds), denormalize(player.rz, config.bounds)
+			local angle, ax, ay, az = (player.rangle / (2 ^ 16)) * (2 * math.pi), denormalize(player.rax, 1), denormalize(player.ray, 1), denormalize(player.raz, 1)
+			return x, y, z, angle, ax, ay, az
 		end
 	end
+end
 
-	lovr.graphics.setShader()
+function client:drawCard(player, cardIndex, ...)
+	local card = player.cards[cardIndex]
+	if card.position <= 0 then return end
+
+	if player.id == self.id then
+		lovr.graphics.setColor(255, 255, 255)
+	else
+		lovr.graphics.setColor(0, 0, 0)
+	end
+
+	if card.type == 1 then
+		self.models.rock:draw(...)
+	elseif card.type == 2 then
+		self.models.paper:draw(...)
+	elseif card.type == 3 then
+		self.models.scissors:draw(...)
+	end
 end
 
 function client:quit()
@@ -292,6 +341,12 @@ function client:controllerpressed(controller, button)
 		self.emoji.transform:origin()
 		self.emoji.transform:translate(self.emoji.position:unpack())
 		self.emoji.transform:rotate(unpack(self.emoji.orientation))
+	elseif controller == self.controllers[2] and button == 'trigger' then
+		local minCard, minDis, x, y, z, angle, ax, ay, az = self:getClosestCard()
+		if minCard and minDis < .05 then
+			self.cardGrab.active = true
+			self.cardGrab.card = minCard
+		end
 	end
 end
 
@@ -302,7 +357,41 @@ function client:controllerreleased(controller, button)
 			self.emoji.current = index
 		end
 		self.emoji.active = false
+	elseif controller == self.controllers[2] and button == 'trigger' and self.cardGrab.active then
+		self.cardGrab.active = false
+		self.cardGrab.card = nil
 	end
+end
+
+local tmpTransform = lovr.math.newTransform()
+function client:getClosestCard()
+	if not self.controllers[2] then return nil end
+	local mindis, mincard = 1000000, nil
+	local player = self.players[self.id]
+	local cardCount = 0
+	for i = 1, #player.cards do if player.cards[i].position > 0 then cardCount = cardCount + 1 end end
+	local spread = .075
+	local fan = -(cardCount - 1) / 2 * spread
+	local x, y, z = self.controllers[2]:getPosition()
+	local angle, ax, ay, az = self.controllers[2]:getOrientation()
+	for i, card in ipairs(player.cards) do
+		if card.position > 0 then
+			tmpTransform:origin()
+			tmpTransform:translate(self.controllers[1]:getPosition())
+			tmpTransform:rotate(self.controllers[1]:getOrientation())
+			tmpTransform:translate(0, 0, .5)
+			tmpTransform:rotate(-fan, 0, 1, 0)
+			tmpTransform:translate(0, 0, -.65)
+			local cx, cy, cz = tmpTransform:transformPoint(0, 0, 0)
+			local dx, dy, dz = (cx - x), (cy - y), (cz - z)
+			local dis = math.sqrt(dx * dx + dy * dy + dz * dz)
+			if dis < mindis then
+				mindis, mincard = dis, i
+			end
+			fan = fan + spread
+		end
+	end
+	return mincard, mindis
 end
 
 function client:getEmojiIndex()
@@ -463,6 +552,7 @@ function client.messages.server.sync(self, data)
 			p.rx, p.ry, p.rz = player.rx, player.ry, player.rz
 			p.rangle, p.rax, p.ray, p.az = player.rangle, player.rax, player.ray, player.az
 			p.emoji = player.emoji
+			p.grabbedCard = player.grabbedCard
 		end
 	end
 end
