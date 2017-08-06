@@ -146,7 +146,6 @@ function client:draw()
 				self.models.head:draw(x, y, z, 1, angle, ax, ay, az)
 
 				if player.emoji > 0 then
-					print('emoji', player.emoji)
 					local emojiSize = .08
 					lovr.graphics.push()
 					lovr.graphics.translate(x, y, z)
@@ -294,11 +293,11 @@ end
 
 function client:controllerreleased(controller, button)
 	if controller == self.controllers[2] and button == 'menu' and self.emoji.active == true then
-		self.emoji.active = false
 		local index = self:getEmojiIndex()
 		if index and index > 0 then
 			self.emoji.current = index
 		end
+		self.emoji.active = false
 	end
 end
 
