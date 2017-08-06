@@ -36,7 +36,8 @@ function client:init()
 		paper = lovr.graphics.newModel('media/paper-card.obj', 'media/paper-tex.png'),
 		scissors = lovr.graphics.newModel('media/scissor-card.obj', 'media/scissor-tex.png'),
 		star = lovr.graphics.newModel('media/star.obj', 'media/star-tex.png'),
-		money = lovr.graphics.newModel('media/moneystack.obj', 'media/money-tex.jpg')
+		money = lovr.graphics.newModel('media/moneystack.obj', 'media/money-tex.jpg'),
+		table = lovr.graphics.newModel('media/table.obj', 'media/table-tex.png')
 	}
 	self.cardGrab = {
 		active = false,
@@ -137,6 +138,8 @@ function client:draw()
 		self.viewMat:translate(lovr.headset.getPosition())
 		self.viewMat:rotate(lovr.headset.getOrientation())
 		self.shader:send('viewMat', self.viewMat)
+
+		self.models.table:draw(0, 1, 0)
 
 		lovr.graphics.setColor(255, 255, 255)
 		lovr.graphics.setShader()
@@ -254,7 +257,7 @@ function client:draw()
 						lovr.graphics.rotate(-fan, 0, 1, 0)
 						lovr.graphics.translate(0, 0, -.65)
 						if closest == i and closestDistance < .075 then
-							lovr.graphics.translate(0, .02, 0)
+							lovr.graphics.translate(0, .03, 0)
 						end
 						lovr.graphics.rotate(-math.pi / 2, 1, 0, 0)
 						lovr.graphics.rotate(.1, 0, 1, 0)
