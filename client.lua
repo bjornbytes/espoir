@@ -158,7 +158,7 @@ function client:draw()
 					lovr.graphics.push()
 					lovr.graphics.translate(x, y, z)
 					lovr.graphics.rotate(angle, ax, ay, az)
-					lovr.graphics.plane(self.textures[config.emoji[player.emoji]], 0, 0, -.01, emojiSize)
+					lovr.graphics.plane(self.textures[config.emoji[player.emoji]], 0, 0, -.01, emojiSize, math.pi, 0, 1, 0)
 					lovr.graphics.pop()
 				end
 
