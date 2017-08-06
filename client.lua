@@ -234,14 +234,14 @@ function client:draw()
 						if i ~= index then
 							local x = -planeSize / 2 + emojiSize / 2 + emojiSize * ((i - 1) % emojiPerRow)
 							local y = planeSize / 2 - emojiSize / 2 - emojiSize * math.floor((i - 1) / emojiPerRow)
-							lovr.graphics.plane(self.textures[emoji], x, y, .01, emojiSize)
+							lovr.graphics.plane(self.textures[emoji], x, y, .01, emojiSize * .75)
 						end
 					end
 					for i, emoji in ipairs(config.emoji) do
 						if i == index then
 							local x = -planeSize / 2 + emojiSize / 2 + emojiSize * ((i - 1) % emojiPerRow)
 							local y = planeSize / 2 - emojiSize / 2 - emojiSize * math.floor((i - 1) / emojiPerRow)
-							lovr.graphics.plane(self.textures[emoji], x, y, .03, emojiSize)
+							lovr.graphics.plane(self.textures[emoji], x, y, .03, emojiSize * .75)
 						end
 					end
 					lovr.graphics.pop()
