@@ -298,7 +298,7 @@ function client.messages.server.sync(self, data)
 			p.angle, p.ax, p.ay, p.az = player.angle, player.ax, player.ay, player.az
 			p.lx, p.ly, p.lz = player.lx, player.ly, player.lz
 			p.langle, p.lax, p.lay, p.az = player.langle, player.lax, player.lay, player.az
-			p.rx, p.ry, p.rz = prayer.rx, prayer.ry, prayer.rz
+			p.rx, p.ry, p.rz = player.rx, player.ry, player.rz
 			p.rangle, p.rax, p.ray, p.az = player.rangle, player.rax, player.ray, player.az
 		end
 	end
