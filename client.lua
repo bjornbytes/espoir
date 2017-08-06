@@ -97,6 +97,15 @@ function client:draw()
 				local x, y, z = denormalize(player.x), denormalize(player.y), denormalize(player.z)
 				local angle, ax, ay, az = (player.angle / (2 ^ 16)) * (2 * math.pi), player.ax / (2 ^ 16), player.ay / (2 ^ 16), player.az / (2 ^ 16)
 				lovr.graphics.cube('fill', x, y, z, .3, angle, ax, ay, az)
+
+				if self.controllerModel then
+					local x, y, z = player.lx, player.ly, player.lz
+					local angle, ax, ay, az = player.langle, player.lax, player.lay, player.laz
+					self.controllerModel:draw(x, y, z, 1, angle, ax, ay, az)
+					local x, y, z = player.rx, player.ry, player.rz
+					local angle, ax, ay, az = player.rangle, player.rax, player.ray, player.raz
+					self.controllerModel:draw(x, y, z, 1, angle, ax, ay, az)
+				end
 			else
 				if self.controllers[1] then
 					local cardCount = 0
