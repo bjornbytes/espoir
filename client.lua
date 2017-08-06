@@ -158,6 +158,7 @@ function client:draw()
 		lovr.graphics.setColor(255, 255, 255)
 
 		for i, player in ipairs(self.players) do
+			local hx, hy, hz = lovr.headset.getPosition()
 			if player.id ~= self.id then
 				local x, y, z = denormalize(player.x, config.bounds), denormalize(player.y, config.bounds), denormalize(player.z, config.bounds)
 				local angle, ax, ay, az = (player.angle / (2 ^ 16)) * (2 * math.pi), denormalize(player.ax, 1), denormalize(player.ay, 1), denormalize(player.az, 1)
@@ -171,6 +172,10 @@ function client:draw()
 					lovr.graphics.plane(self.textures[config.emoji[player.emoji]], 0, 0, -.01, emojiSize, math.pi, 0, 1, 0)
 					lovr.graphics.pop()
 				end
+				lovr.graphics.setShader()
+				local angle, ax, ay, az = lovr.math.lookAt(hx, hy, hz, x, y + .25, z)
+				lovr.graphics.print(player.username, x, y + .25, z, .07, angle, ax, ay, az)
+				lovr.graphics.setShader(self.shader)
 			else
 				if self.emoji.active then
 					local index = self:getEmojiIndex()
@@ -200,7 +205,12 @@ function client:draw()
 					end
 					lovr.graphics.pop()
 				end
+				lovr.graphics.setShader()
+				local angle, ax, ay, az = lovr.headset.getOrientation()
+				lovr.graphics.print(player.username, hx, hy + .25, hz, .07, angle, ax, ay, az)
+				lovr.graphics.setShader(self.shader)
 			end
+
 
 			if self.controllerModel then
 				local x, y, z, angle, ax, ay, az = self:getControllerTransform(player, 1)
