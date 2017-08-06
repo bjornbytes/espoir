@@ -131,6 +131,24 @@ signatures.server = {
 		id = 4,
 		{ 'state', 'string' },
 		{ 'timer', 'float' }
+	},
+
+	'duel',
+	duel = {
+		id = 5,
+		{ 'first', '8bits' },
+		{ 'second', '8bits' }
+	},
+
+	'outcome',
+	outcome = {
+		id = 6,
+		{ 'first', '8bits' },
+		{ 'second', '8bits' },
+		{ 'firstCards', { { 'type', '2bits' }, { 'position', '4bits' } } },
+		{ 'secondCards', { { 'type', '2bits' }, { 'position', '4bits' } } },
+		{ 'firstStars', '4bits' },
+		{ 'secondStars', '4bits' }
 	}
 }
 

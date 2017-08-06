@@ -6,7 +6,7 @@ local words = require 'words'
 
 local function log(peer, ...)
   local tag = peer == 'all' and peer or peer:index()
-  print('[' .. tag .. ']', ...)
+  --print('[' .. tag .. ']', ...)
 end
 
 local server = {}
@@ -43,6 +43,33 @@ function server:update(dt)
 		self.timer = self.timer - dt
 		if self.timer <= 0 and self.gameState == 'playing' then
 			print('times up!')
+		end
+	end
+
+	for i = 1, config.maxPlayers do
+		if self.players[i] then
+			if self.players[i].proposition > 0 then
+				for j = 1, config.maxPlayers do
+					if i ~= j then
+						local p1, p2 = self.players[i], self.players[j]
+						if p1.proposition == p2.proposition and ((p1.lax - p2.lax) ^ 2 + (p1.lay - p2.lay) ^ 2 + (p1.laz - p2.laz) ^ 2) < .08 ^ 2 then
+							p1.dueling = j
+							p2.dueling = i
+							p1.duelTimer = 10
+							p2.duelTimer = 10
+							p1.proposition = 0
+							p2.proposition = 0
+						end
+					end
+				end
+			end
+
+			if self.players[i].duelTimer > 0 then
+				self.players[i].duelTimer = math.max(self.players[i].duelTimer - dt, 0)
+				if self.players[i].duelTimer == 0 then
+					-- Timeout
+				end
+			end
 		end
 	end
 
@@ -86,7 +113,7 @@ function server:broadcast(message, data)
   self.upload:clear()
   self.upload:write(signatures.server[message].id, '4bits')
   self.upload:pack(data, signatures.server[message])
-  self.host:broadcast(tostring(self.upload))
+  self.host:broadcast(tostring(self.upload), 0, 'unreliable')
 end
 
 function server:generateUsername()
@@ -157,7 +184,10 @@ function server:createPlayer(peer)
     },
 		emoji = 0,
 		grabbedCard = 0,
-		proposition = 0
+		proposition = 0,
+		dueling = 0,
+		duelTimer = 0,
+		duelChoice = 0
   }
 
   return self.players[id]

@@ -48,6 +48,8 @@ function client:init()
 	}
 
 	self.proposition = 0
+	self.dueling = 0
+	self.duelTimer = 0
 
 	self.textures = {}
 	for _, emoji in ipairs(config.emoji) do
@@ -176,6 +178,7 @@ function client:draw()
 					lovr.graphics.plane(self.textures[config.emoji[player.emoji]], 0, 0, -.01, emojiSize, math.pi, 0, 1, 0)
 					lovr.graphics.pop()
 				end
+
 				lovr.graphics.setShader()
 				local angle, ax, ay, az = lovr.math.lookAt(hx, hy, hz, x, y + .25, z)
 				lovr.graphics.print(player.username, x, y + .25, z, .05, angle, ax, ay, az)
@@ -213,12 +216,23 @@ function client:draw()
 					end
 					lovr.graphics.pop()
 				end
+
 				lovr.graphics.setShader()
 				local angle, ax, ay, az = lovr.headset.getOrientation()
 				lovr.graphics.print(player.username, hx, hy + .35, hz, .07, angle, ax, ay, az)
 				lovr.graphics.setShader(self.shader)
-			end
 
+				if self.dueling > 0 then
+					local other = self.players[self.dueling]
+					local tx, ty, tz = (player.x + other.x) / 2, 1, (player.z + other.z) / 2
+					self.models.table:draw(tx, ty, tz, 1, quat():between(vec3(player.x, 0, player.z), vec3(other.x, 0, other.z):getAngleAxis()))
+					lovr.graphics.setShader()
+					local hx, hy, hz = lovr.headset.getPosition()
+					local angle, ax, ay, az = lovr.math.lookAt(hx, hy, hz, tx, ty + 1, tz)
+					lovr.graphics.print(math.ceil(self.duelTimer), tx, ty + 1, tz, .1, angle, ax, ay, az)
+					lovr.graphics.setShader(self.shader)
+				end
+			end
 
 			if self.controllerModel then
 				local x, y, z, angle, ax, ay, az = self:getControllerTransform(player, 1)
@@ -262,7 +276,8 @@ function client:draw()
 						lovr.graphics.rotate(-fan, 0, 1, 0)
 						lovr.graphics.translate(0, 0, -.65)
 						if closest == i and closestDistance < .075 then
-							lovr.graphics.translate(0, .03, 0)
+							lovr.graphics.translate(0, .02, 0)
+							lovr.graphics.rotate(.2, 1, 0, 0)
 						end
 						lovr.graphics.rotate(-math.pi / 2, 1, 0, 0)
 						lovr.graphics.rotate(.1, 0, 1, 0)
@@ -305,7 +320,7 @@ function client:draw()
 				local x, y, z = self:getControllerTransform(player, 2)
 				local hx, hy, hz = lovr.headset.getPosition()
 				local angle, ax, ay, az = lovr.math.lookAt(hx, hy, hz, x, y + .2, z)
-				lovr.graphics.sphere(x, y, z, .1, 0, 0, 0)
+				lovr.graphics.sphere(x, y, z, .08, 0, 0, 0)
 				lovr.graphics.setShader()
 				lovr.graphics.print(str, x, y + .2, z, .05, angle, ax, ay, az)
 				lovr.graphics.setShader(self.shader)
@@ -353,7 +368,7 @@ end
 
 function client:quit()
   if self.host and self.peer then
-    self.peer:disconnect_now()
+    self.peer:disconnect()
     self.host:flush()
   end
 end
@@ -592,9 +607,9 @@ function client.messages.server.sync(self, data)
 			p.langle, p.lax, p.lay, p.az = player.langle, player.lax, player.lay, player.az
 			p.rx, p.ry, p.rz = player.rx, player.ry, player.rz
 			p.rangle, p.rax, p.ray, p.az = player.rangle, player.rax, player.ray, player.az
-			p.emoji = player.emoji
-			p.grabbedCard = player.grabbedCard
-			p.proposition = player.proposition
+			p.emoji = player.emoji or p.emoji
+			p.grabbedCard = player.grabbedCard or p.grabbedCard
+			p.proposition = player.proposition or p.proposition
 		end
 	end
 end
@@ -602,6 +617,20 @@ end
 function client.messages.server.gamestate(self, data)
 	self.gameState = data.state
 	self.timer = data.timer
+end
+
+function client.messages.server.duel(self, data)
+	if data.first == self.id then
+		self.dueling = data.second
+		self.duelTimer = 10
+	elseif data.second == self.id then
+		self.dueling = data.first
+		self.duelTimer = 10
+	end
+end
+
+function client.messages.server.outcome(self, data)
+	--
 end
 
 return client
