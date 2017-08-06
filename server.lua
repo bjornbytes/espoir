@@ -23,6 +23,7 @@ function server:init()
   self.download = trickle.create()
 
 	self.gameState = 'waiting'
+	self.timer = 0
   self.players = {}
 	self.lastSync = lovr.timer.getTime()
 
@@ -35,6 +36,13 @@ function server:update(dt)
 		if not event then break end
 		if self.events[event.type] then
 			self.events[event.type](self, event)
+		end
+	end
+
+	if self.timer > 0 then
+		self.timer = self.timer - dt
+		if self.timer <= 0 and self.gameState == 'playing' then
+			print('times up!')
 		end
 	end
 
@@ -184,7 +192,7 @@ end
 server.messages = {}
 function server.messages.join(self, peer, data)
   local player = self:createPlayer(peer)
-  self:send(peer, 'join', { id = player.id, state = self.gameState })
+  self:send(peer, 'join', { id = player.id, state = self.gameState, timer = self.timer })
   self:broadcast('player', player)
 	local count = 0
 	for i = 1, config.maxPlayers do
@@ -198,8 +206,8 @@ function server.messages.join(self, peer, data)
 
 	if self.gameState == 'waiting' and count >= config.groupSize then
 		self.gameState = 'playing'
-		print('oh state yeah')
-		self:broadcast('gamestate', { state = self.gameState })
+		self.timer = 10 * 60
+		self:broadcast('gamestate', { state = self.gameState, timer = self.timer })
 	end
 end
 

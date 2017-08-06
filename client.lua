@@ -92,6 +92,13 @@ function client:draw()
 		lovr.graphics.setColor(255, 255, 255)
 		if self.gameState == 'waiting' then
 			lovr.graphics.print('Waiting for contestants...', 0, 3, -5, .5)
+		elseif self.gameState == 'playign' then
+			local t = math.floor(self.timer)
+			local seconds = math.floor(t % 60)
+			local minutes = math.floor(t / 60)
+			if minutes < 10 then minutes = '0' .. minutes end
+			if seconds < 10 then seconds = '0' .. seconds end
+			lovr.graphics.print(minutes .. ':' .. seconds, 0, 3, -5, .5)
 		end
 
 		for i, player in ipairs(self.players) do
@@ -279,6 +286,7 @@ client.messages.server = {}
 function client.messages.server.join(self, data)
 	self.id = data.id
 	self.gameState = data.state
+	self.timer = data.timer
 end
 
 function client.messages.server.player(self, data)
@@ -307,6 +315,7 @@ end
 
 function client.messages.server.gamestate(self, data)
 	self.gameState = data.state
+	self.timer = data.timer
 end
 
 return client
