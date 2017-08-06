@@ -25,6 +25,7 @@ function client:init()
 	self:refreshControllers()
 	self.lastInput = lovr.timer.getTime()
 	self.models = {
+		head = lovr.graphics.newModel('media/head.obj', 'media/head-tex.png'),
 		rock = lovr.graphics.newModel('media/rock-card.obj', 'media/rock-tex.png'),
 		paper = lovr.graphics.newModel('media/paper-card.obj', 'media/paper-tex.png'),
 		scissors = lovr.graphics.newModel('media/scissor-card.obj', 'media/scissor-tex.png')
@@ -97,7 +98,7 @@ function client:draw()
 			if player.id ~= self.id then
 				local x, y, z = denormalize(player.x, config.bounds), denormalize(player.y, config.bounds), denormalize(player.z, config.bounds)
 				local angle, ax, ay, az = (player.angle / (2 ^ 16)) * (2 * math.pi), denormalize(player.ax, 1), denormalize(player.ay, 1), denormalize(player.az, 1)
-				lovr.graphics.cube('fill', x, y, z, .3, angle, ax, ay, az)
+				self.models.head:draw(x, y, z, 1, angle, ax, ay, az)
 
 				if self.controllerModel then
 					local x, y, z = denormalize(player.lx, config.bounds), denormalize(player.ly, config.bounds), denormalize(player.lz, config.bounds)
