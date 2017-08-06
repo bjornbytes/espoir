@@ -361,7 +361,7 @@ function client:controllerreleased(controller, button)
 		self.emoji.active = false
 	elseif controller == self.controllers[2] and button == 'trigger' and self.cardGrab.active then
 		self.cardGrab.active = false
-		self.cardGrab.card = nil
+		self.cardGrab.card = 0
 	end
 end
 
