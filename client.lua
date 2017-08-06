@@ -85,9 +85,10 @@ end
 
 function client:draw()
 	if self.state == 'server' then
-		lovr.graphics.setColor(255, 255, 255)
+		lovr.graphics.setColor(50, 50, 50)
 		lovr.graphics.plane('fill', 0, 0, 0, 10, math.pi / 2, 1, 0, 0)
 
+		lovr.graphics.setColor(255, 255, 255)
 		if self.gameState == 'waiting' then
 			lovr.graphics.print('Waiting for contestants...', 0, 3, -5, .5)
 		end

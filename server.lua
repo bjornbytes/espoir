@@ -211,7 +211,7 @@ function server.messages.input(self, peer, data)
   player.lx, player.ly, player.lz = data.lx, data.ly, data.lz
   player.langle, player.lax, player.lay, player.laz = data.langle, data.lax, data.lay, data.laz
   player.rx, player.ry, player.rz = data.rx, data.ry, data.rz
-  player.rangle, player.rax, player.ray, player.raz = data.lx, data.ly, data.lz
+  player.rangle, player.rax, player.ray, player.raz = data.rangle, data.rax, data.ray, data.raz
 end
 
 return server
