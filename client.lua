@@ -177,7 +177,7 @@ function client:draw()
 				end
 				lovr.graphics.setShader()
 				local angle, ax, ay, az = lovr.math.lookAt(hx, hy, hz, x, y + .25, z)
-				lovr.graphics.print(player.username, x, y + .25, z, .07, angle, ax, ay, az)
+				lovr.graphics.print(player.username, x, y + .25, z, .05, angle, ax, ay, az)
 				lovr.graphics.setShader(self.shader)
 			else
 				if self.emoji.active then
@@ -210,7 +210,7 @@ function client:draw()
 				end
 				lovr.graphics.setShader()
 				local angle, ax, ay, az = lovr.headset.getOrientation()
-				lovr.graphics.print(player.username, hx, hy + .25, hz, .07, angle, ax, ay, az)
+				lovr.graphics.print(player.username, hx, hy + .35, hz, .07, angle, ax, ay, az)
 				lovr.graphics.setShader(self.shader)
 			end
 
