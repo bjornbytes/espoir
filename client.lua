@@ -37,7 +37,9 @@ function client:init()
 		scissors = lovr.graphics.newModel('media/scissor-card.obj', 'media/scissor-tex.png'),
 		star = lovr.graphics.newModel('media/star.obj', 'media/star-tex.png'),
 		money = lovr.graphics.newModel('media/moneystack.obj', 'media/money-tex.jpg'),
-		table = lovr.graphics.newModel('media/table.obj', 'media/table-tex.png')
+		table = lovr.graphics.newModel('media/table.obj', 'media/table-tex.png'),
+		portrait = lovr.graphics.newModel('media/portrait.obj'),
+		landscape = lovr.graphics.newModel('media/landscape.obj')
 	}
 	self.cardGrab = {
 		active = false,
@@ -55,6 +57,13 @@ function client:init()
 	for _, emoji in ipairs(config.emoji) do
 		self.textures[emoji] = lovr.graphics.newTexture('media/emoji/' .. emoji .. '.png')
 	end
+
+	self.textures.portrait1 = lovr.graphics.newTexture('media/portrait1-tex.png')
+	self.textures.portrait2 = lovr.graphics.newTexture('media/portrait2-tex.png')
+	self.textures.landscape1 = lovr.graphics.newTexture('media/landscape1-tex.png')
+	self.textures.landscape2 = lovr.graphics.newTexture('media/landscape2-tex.png')
+	self.textures.landscape3 = lovr.graphics.newTexture('media/landscape3-tex.png')
+	self.textures.landscape4 = lovr.graphics.newTexture('media/landscape4-tex.png')
 
 	self.shader = require('media/shader')
 	self.viewMat = lovr.math.newTransform()
@@ -143,25 +152,53 @@ function client:draw()
 
 		--self.models.table:draw(0, 1, 0)
 
-		lovr.graphics.setColor(255, 255, 255)
-		lovr.graphics.setShader()
-		if self.gameState == 'waiting' then
-			lovr.graphics.print('Waiting for contestants...', 0, 3, -5, .5)
-		elseif self.gameState == 'playing' then
-			local t = math.floor(self.timer)
-			local seconds = math.floor(t % 60)
-			local minutes = math.floor(t / 60)
-			if minutes < 10 then minutes = '0' .. minutes end
-			if seconds < 10 then seconds = '0' .. seconds end
-			lovr.graphics.print(minutes .. ':' .. seconds, 0, 3, -5, .5)
-		end
-
 		lovr.graphics.setShader(self.shader)
 
+		-- Ground
 		lovr.graphics.setColor(50, 50, 50)
 		lovr.graphics.plane('fill', 0, 0, 0, 10, math.pi / 2, 1, 0, 0)
 
 		lovr.graphics.setColor(255, 255, 255)
+
+		-- Left wall
+		lovr.graphics.push()
+		lovr.graphics.translate(-5, 1.5, 0)
+		self.models.landscape:setTexture(self.textures.landscape1)
+		self.models.landscape:draw(.05, 0, 0, 1)
+		lovr.graphics.scale(1, 3, 10)
+		lovr.graphics.plane('fill', 0, 0, 0, 1, math.pi / 2, 0, 1, 0)
+		lovr.graphics.pop()
+
+		-- Right wall
+		lovr.graphics.push()
+		lovr.graphics.translate(5, 1.5, 0)
+		self.models.landscape:setTexture(self.textures.landscape2)
+		self.models.landscape:draw(-.05, 0, 0, 1, math.pi, 0, 1, 0)
+		lovr.graphics.scale(1, 3, 10)
+		lovr.graphics.plane('fill', 0, 0, 0, 1, -math.pi / 2, 0, 1, 0)
+		lovr.graphics.pop()
+
+		-- Front wall
+		lovr.graphics.push()
+		lovr.graphics.translate(0, 1.5, -5)
+		self.models.portrait:setTexture(self.textures.portrait1)
+		self.models.portrait:draw(-3, 0, .05, 1, -math.pi / 2, 0, 1, 0)
+		self.models.portrait:setTexture(self.textures.portrait2)
+		self.models.portrait:draw(3, 0, .05, 1, -math.pi / 2, 0, 1, 0)
+		lovr.graphics.scale(10, 3, 1)
+		lovr.graphics.plane('fill', 0, 0, 0, 1)
+		lovr.graphics.pop()
+
+		-- Back wall
+		lovr.graphics.push()
+		lovr.graphics.translate(0, 1.5, 5)
+		self.models.landscape:setTexture(self.textures.landscape3)
+		self.models.landscape:draw(-3, 0, -.05, 1, math.pi / 2, 0, 1, 0)
+		self.models.landscape:setTexture(self.textures.landscape4)
+		self.models.landscape:draw(3, 0, -.05, 1, math.pi / 2, 0, 1, 0)
+		lovr.graphics.scale(10, 3, 1)
+		lovr.graphics.plane('fill', 0, 0, 0, 1)
+		lovr.graphics.pop()
 
 		for i, player in ipairs(self.players) do
 			local hx, hy, hz = lovr.headset.getPosition()
@@ -325,6 +362,19 @@ function client:draw()
 				lovr.graphics.print(str, x, y + .2, z, .05, angle, ax, ay, az)
 				lovr.graphics.setShader(self.shader)
 			end
+		end
+
+		lovr.graphics.setShader()
+		if self.gameState == 'waiting' then
+			lovr.graphics.print('Waiting for contestants...', 0, 3, -5, .5)
+		elseif self.gameState == 'playing' then
+			local t = math.floor(self.timer)
+			local seconds = math.floor(t % 60)
+			local minutes = math.floor(t / 60)
+			if minutes < 10 then minutes = '0' .. minutes end
+			if seconds < 10 then seconds = '0' .. seconds end
+			lovr.graphics.setColor(0, 0, 0)
+			lovr.graphics.print(minutes .. ':' .. seconds, 0, 2, -4.99, .5)
 		end
 	end
 end
