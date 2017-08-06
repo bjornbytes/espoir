@@ -16,7 +16,25 @@ signatures.client = {
     id = 3,
     { 'x', '16bits' },
     { 'y', '16bits' },
-    { 'z', '16bits' }
+    { 'z', '16bits' },
+    { 'angle', '16bits' },
+    { 'ax', '16bits' },
+    { 'ay', '16bits' },
+    { 'az', '16bits' },
+    { 'lx', '16bits' },
+    { 'ly', '16bits' },
+    { 'lz', '16bits' },
+    { 'langle', '16bits' },
+    { 'lax', '16bits' },
+    { 'lay', '16bits' },
+    { 'laz', '16bits' },
+    { 'rx', '16bits' },
+    { 'ry', '16bits' },
+    { 'rz', '16bits' },
+    { 'rangle', '16bits' },
+    { 'rax', '16bits' },
+    { 'ray', '16bits' },
+    { 'raz', '16bits' }
   }
 }
 
