@@ -329,7 +329,7 @@ function client:draw()
 						end
 						lovr.graphics.push()
 						lovr.graphics.translate(x, y, z)
-						lovr.graphics.rotate(-math.pi / 4, 1, 0, 0)
+						lovr.graphics.rotate(-math.pi / 2, 1, 0, 0)
 						self:drawCard(player, i, 0, 0, 0, .5)
 						lovr.graphics.pop()
 					elseif (player.id == self.id and self.cardGrab.active and self.cardGrab.card == i) or (player.grabbedCard == i) then
@@ -511,7 +511,7 @@ end
 -- 2.2m, 1.1m
 function client:getDuelZones()
 	if self.dueling == 0 then return nil end
-	local tableHeight = 1.1
+	local tableHeight = .9
 	local tableLength = 2.2
 	local other = self.players[self.dueling]
 	local hx, hy, hz = lovr.headset.getPosition()
