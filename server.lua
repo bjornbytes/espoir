@@ -58,6 +58,8 @@ function server:update(dt)
 							p2.dueling = i
 							p1.duelTimer = 30
 							p2.duelTimer = 30
+							p1.duelOutcomeTimer = 1
+							p2.duelOutcomeTimer = 1
 							p1.proposition = 0
 							p2.proposition = 0
 							p1.duelChoice = 0
@@ -68,10 +70,55 @@ function server:update(dt)
 				end
 			end
 
-			if self.players[i].duelTimer > 0 then
-				self.players[i].duelTimer = math.max(self.players[i].duelTimer - dt, 0)
-				if self.players[i].duelTimer == 0 then
-					-- Timeout, send outcome message
+			if self.players[i].dueling > 0 then
+				local p1 = self.players[i]
+				local p2 = self.players[p1.dueling]
+
+				if p1.duelChoice > 0 and p2.duelChoice > 0 then
+					p1.duelTimer = 0
+					p2.duelTimer = 0
+					p1.duelOutcomeTimer = math.max(p1.duelOutcomeTimer - dt, 0)
+
+					if p1.duelOutcomeTimer == 0 then
+						p1.dueling = 0
+						p2.dueling = 0
+						p1.cards[p1.duelChoice].position = 0
+						p2.cards[p2.duelChoice].position = 0
+
+						-- Figure out if someone won
+						local p1Type = p1.cards[p1.duelChoice].type
+						local p2Type = p2.cards[p2.duelChoice].type
+						if (p1Type == 2 and p2Type == 1) or (p1Type == 1 and p2Type == 3) or (p1Type == 3 and p2Type == 2) then
+							p1.stars = p1.stars + 1
+							p2.stars = p2.stars - 1
+						elseif (p2Type == 2 and p1Type == 1) or (p2Type == 1 and p1Type == 3) or (p2Type == 3 and p1Type == 2) then
+							p1.stars = p1.stars - 1
+							p2.stars = p2.stars + 1
+						end
+
+						-- Tell everyone about the changes
+						self:broadcast('outcome', { first = i, second = p1.dueling, firstCards = p1.cards, secondCards = p2.cards, firstStars = p1.stars, secondStars = p2.stars })
+					end
+				end
+
+				if p1.duelTimer > 0 then
+					p1.duelTimer = math.max(p1.duelTimer - dt, 0)
+					if p1.duelTimer == 0 then
+						p1.dueling = 0
+						p2.dueling = 0
+
+						if p1.duelChoice > 0 and p2.duelChoice == 0 then
+							p1.cards[p1.duelChoice].position = 0
+							p1.stars = p1.stars + 1
+							p2.stars = p2.stars - 1
+						elseif p2.duelChoice > 0 and p1.duelChoice == 0 then
+							p2.cards[p2.duelChoice].position = 0
+							p2.stars = p2.stars + 1
+							p1.stars = p1.stars - 1
+						end
+
+						self:broadcast('outcome', { first = i, second = p1.dueling, firstCards = p1.cards, secondCards = p2.cards, firstStars = p1.stars, secondStars = p2.stars })
+					end
 				end
 			end
 		end
@@ -191,6 +238,7 @@ function server:createPlayer(peer)
 		proposition = 0,
 		dueling = 0,
 		duelTimer = 0,
+		duelOutcomeTimer = 0,
 		duelChoice = 0
   }
 

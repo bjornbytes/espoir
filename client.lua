@@ -102,16 +102,18 @@ function client:update(dt)
 
 		if self.dueling > 0 and self.duelTimer > 0 then
 			self.duelTimer = math.max(self.duelTimer - dt, 0)
-			local tx, ty, tz, angle, slotX, slotY, slotZ = self:getDuelZones()
-			local x, y, z = self.controllers[2]:getPosition()
-			print(tx, ty, tz, x, y, z, math.sqrt((slotX - x) ^ 2 + (slotY - y) ^ 2 + (slotZ - z) ^ 2), .1)
-			if math.sqrt((slotX - x) ^ 2 + (slotY - y) ^ 2 + (slotZ - z) ^ 2) < .1 then
-				if not self.duelHover then
-					self.duelHover = true
-					self.controllers[2]:vibrate(.002)
+			if self.cardGrab.active then
+				local tx, ty, tz, angle, slotX, slotY, slotZ = self:getDuelZones()
+				local x, y, z = self.controllers[2]:getPosition()
+				print(tx, ty, tz, x, y, z, math.sqrt((slotX - x) ^ 2 + (slotY - y) ^ 2 + (slotZ - z) ^ 2), .1)
+				if math.sqrt((slotX - x) ^ 2 + (slotY - y) ^ 2 + (slotZ - z) ^ 2) < .1 then
+					if not self.duelHover then
+						self.duelHover = true
+						self.controllers[2]:vibrate(.002)
+					end
+				else
+					self.duelHover = false
 				end
-			else
-				self.duelHover = false
 			end
 		end
 
@@ -328,6 +330,7 @@ function client:draw()
 						lovr.graphics.push()
 						lovr.graphics.translate(x, y, z)
 						lovr.graphics.rotate(-math.pi / 2, 1, 0, 0)
+						lovr.graphics.rotate(angle, 0, 1, 0)
 						self:drawCard(player, i, 0, 0, 0, .5)
 						lovr.graphics.pop()
 					elseif (player.id == self.id and self.cardGrab.active and self.cardGrab.card == i) or (player.grabbedCard == i) then
@@ -437,7 +440,7 @@ function client:drawCard(player, cardIndex, ...)
 	local card = player.cards[cardIndex]
 	if card.position <= 0 then return end
 
-	if player.id == self.id or cardIndex == player.grabbedCard then
+	if player.id == self.id or cardIndex == player.grabbedCard or (self.dueling == player.id and self.duelChoice > 0 and player.duelChoice > 0) then
 		lovr.graphics.setColor(255, 255, 255)
 	else
 		lovr.graphics.setColor(0, 0, 0)
@@ -480,7 +483,7 @@ function client:controllerpressed(controller, button)
 		self.emoji.transform:origin()
 		self.emoji.transform:translate(self.emoji.position:unpack())
 		self.emoji.transform:rotate(unpack(self.emoji.orientation))
-	elseif controller == self.controllers[2] and button == 'trigger' then
+	elseif controller == self.controllers[2] and button == 'trigger' and not (self.dueling > 0 and self.duelChoice > 0) then
 		local minCard, minDis, x, y, z, angle, ax, ay, az = self:getClosestCard()
 		if minCard and minDis < .075 then
 			self.cardGrab.active = true
@@ -743,7 +746,24 @@ function client.messages.server.duel(self, data)
 end
 
 function client.messages.server.outcome(self, data)
-	--
+	local p1 = self.players[data.first]
+	local p2 = self.players[data.second]
+
+	if p1 then
+		p1.stars = data.firstStars
+		p1.cards = data.firstCards
+	end
+
+	if p2 then
+		p2.stars = data.secondStars
+		p2.cards = data.secondCards
+	end
+
+	if p1.id == self.id or p2.id == self.id then
+		self.dueling = 0
+		self.duelChoice = 0
+		self.duelTimer = 0
+	end
 end
 
 return client
