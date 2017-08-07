@@ -212,7 +212,7 @@ function client:draw()
 			local hx, hy, hz = lovr.headset.getPosition()
 			if player.id ~= self.id then
 				local x, y, z = denormalize(player.x, config.bounds), denormalize(player.y, config.bounds), denormalize(player.z, config.bounds)
-				local angle, ax, ay, az = (player.angle / (2 ^ 16)) * (2 * math.pi), denormalize(player.ax, 1), denormalize(player.ay, 1), denormalize(player.az, 1)
+				local angle, ax, ay, az = denormalize(player.angle, 2 * math.pi), denormalize(player.ax, 1), denormalize(player.ay, 1), denormalize(player.az, 1)
 				self.models.head:draw(x, y, z, 1, angle, ax, ay, az)
 
 				if player.emoji > 0 then
@@ -270,8 +270,8 @@ function client:draw()
 				if self.dueling > 0 then
 					local other = self.players[self.dueling]
 					local hx, hy, hz = lovr.headset.getPosition()
-					local tx, ty, tz, mySlotX, mySlotY, mySlotZ = self:getDuelZones()
-					self.models.table:draw(tx, ty, tz, .5, angle, 0, 1, 0)
+					local tx, ty, tz, angle, mySlotX, mySlotY, mySlotZ = self:getDuelZones()
+					self.models.table:draw(tx, ty, tz, .6, angle, 0, 1, 0)
 					lovr.graphics.setShader()
 					local angle, ax, ay, az = lovr.math.lookAt(hx, hy, hz, tx, ty + .8, tz)
 					lovr.graphics.print(math.ceil(self.duelTimer), tx, ty + .8, tz, .1, angle, ax, ay, az)
@@ -489,8 +489,8 @@ function client:getDuelZones()
 	local ox, oy, oz = denormalize(other.x, config.bounds), denormalize(other.y, config.bounds), denormalize(other.z, config.bounds)
 	local tx, ty, tz = (hx + ox) / 2, tableHeight, (hz + oz) / 2
 	local angle = -math.atan2((hz - oz), (hx - ox))
-	local mySlotX, mySlotY, mySlotZ = tx + math.cos(angle) * tableLength / 2 * .8, tableHeight + .1, tz + math.sin(angle) * tableLength / 2 * .8
-	return tx, ty, tz, mySlotX, mySlotY, mySlotZ
+	local mySlotX, mySlotY, mySlotZ = tx - math.cos(angle) * tableLength / 2 * .8, tableHeight + .1, tz - math.sin(angle) * tableLength / 2 * .8
+	return tx, ty, tz, angle, mySlotX, mySlotY, mySlotZ
 end
 
 function client:stopGrabbingCard()
