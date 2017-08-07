@@ -56,8 +56,8 @@ function server:update(dt)
 						if p1.proposition == p2.proposition and math.sqrt((p1.rx - p2.rx) ^ 2 + (p1.ry - p2.ry) ^ 2 + (p1.rz - p2.rz) ^ 2) < thresh then
 							p1.dueling = j
 							p2.dueling = i
-							p1.duelTimer = 10
-							p2.duelTimer = 10
+							p1.duelTimer = 30
+							p2.duelTimer = 30
 							p1.proposition = 0
 							p2.proposition = 0
 							p1.duelChoice = 0

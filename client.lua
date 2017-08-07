@@ -285,7 +285,7 @@ function client:draw()
 					local other = self.players[self.dueling]
 					local hx, hy, hz = lovr.headset.getPosition()
 					local tx, ty, tz, angle, mySlotX, mySlotY, mySlotZ = self:getDuelZones()
-					self.models.table:draw(tx, ty, tz, .6, angle, 0, 1, 0)
+					self.models.table:draw(tx, ty, tz, .5, angle, 0, 1, 0)
 					lovr.graphics.setShader()
 					local angle, ax, ay, az = lovr.math.lookAt(hx, hy, hz, tx, ty + .8, tz)
 					lovr.graphics.print(math.ceil(self.duelTimer), tx, ty + .8, tz, .1, angle, ax, ay, az)
@@ -516,8 +516,8 @@ function client:getDuelZones()
 	local ox, oy, oz = denormalize(other.x, config.bounds), denormalize(other.y, config.bounds), denormalize(other.z, config.bounds)
 	local tx, ty, tz = (hx + ox) / 2, tableHeight, (hz + oz) / 2
 	local angle = -math.atan2((hz - oz), (hx - ox))
-	local mySlotX, mySlotY, mySlotZ = tx + math.cos(-angle) * tableLength / 2 * .8, tableHeight + .2, tz + math.sin(-angle) * tableLength / 2 * .8
-	local theirSlotX, theirSlotY, theirSlotZ = tx - math.cos(-angle) * tableLength * .6 / 2 * .8, tableHeight + .2, tz - math.sin(-angle) * tableLength * .6 / 2 * .8
+	local mySlotX, mySlotY, mySlotZ = tx + math.cos(-angle) * tableLength * .5 / 2 * .8, tableHeight + .2, tz + math.sin(-angle) * tableLength * .5 / 2 * .8
+	local theirSlotX, theirSlotY, theirSlotZ = tx - math.cos(-angle) * tableLength * .5 / 2 * .8, tableHeight + .2, tz - math.sin(-angle) * tableLength * .5 / 2 * .8
 	return tx, ty, tz, angle, mySlotX, mySlotY, mySlotZ, theirSlotX, theirSlotY, theirSlotZ
 end
 
@@ -732,12 +732,12 @@ function client.messages.server.duel(self, data)
 	if data.first == self.id then
 		self.dueling = data.second
 		self.duelChoice = 0
-		self.duelTimer = 10
+		self.duelTimer = 30
 		self.proposition = 0
 	elseif data.second == self.id then
 		self.dueling = data.first
 		self.duelChoice = 0
-		self.duelTimer = 10
+		self.duelTimer = 30
 		self.proposition = 0
 	end
 end
