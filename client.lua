@@ -271,8 +271,8 @@ function client:draw()
 					local other = self.players[self.dueling]
 					local hx, hy, hz = lovr.headset.getPosition()
 					local ox, oy, oz = denormalize(other.x, config.bounds), denormalize(other.y, config.bounds), denormalize(other.z, config.bounds)
-					local tx, ty, tz = (hx + ox) / 2, 1.2, (hz + oz) / 2
-					local angle = math.atan2((hz - oz), (hx - ox))
+					local tx, ty, tz = (hx + ox) / 2, 1.1, (hz + oz) / 2
+					local angle = -math.atan2((hz - oz), (hx - ox))
 					print(tx, ty, tz, angle)
 					self.models.table:draw(tx, ty, tz, .5, angle, 0, 1, 0)
 					lovr.graphics.setShader()
