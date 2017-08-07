@@ -677,9 +677,11 @@ function client.messages.server.duel(self, data)
 	if data.first == self.id then
 		self.dueling = data.second
 		self.duelTimer = 10
+		self.proposition = 0
 	elseif data.second == self.id then
 		self.dueling = data.first
 		self.duelTimer = 10
+		self.proposition = 0
 	end
 end
 
