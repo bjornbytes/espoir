@@ -489,7 +489,7 @@ function client:getDuelZones()
 	local ox, oy, oz = denormalize(other.x, config.bounds), denormalize(other.y, config.bounds), denormalize(other.z, config.bounds)
 	local tx, ty, tz = (hx + ox) / 2, tableHeight, (hz + oz) / 2
 	local angle = -math.atan2((hz - oz), (hx - ox))
-	local mySlotX, mySlotY, mySlotZ = tx - math.cos(angle) * tableLength / 2 * .8, tableHeight + .1, tz - math.sin(angle) * tableLength / 2 * .8
+	local mySlotX, mySlotY, mySlotZ = tx - math.cos(-angle) * tableLength / 2 * .8, tableHeight + .2, tz - math.sin(-angle) * tableLength / 2 * .8
 	return tx, ty, tz, angle, mySlotX, mySlotY, mySlotZ
 end
 
@@ -684,9 +684,9 @@ function client.messages.server.sync(self, data)
 			p.x, p.y, p.z = player.x, player.y, player.z
 			p.angle, p.ax, p.ay, p.az = player.angle, player.ax, player.ay, player.az
 			p.lx, p.ly, p.lz = player.lx, player.ly, player.lz
-			p.langle, p.lax, p.lay, p.az = player.langle, player.lax, player.lay, player.az
+			p.langle, p.lax, p.lay, p.laz = player.langle, player.lax, player.lay, player.laz
 			p.rx, p.ry, p.rz = player.rx, player.ry, player.rz
-			p.rangle, p.rax, p.ray, p.az = player.rangle, player.rax, player.ray, player.az
+			p.rangle, p.rax, p.ray, p.raz = player.rangle, player.rax, player.ray, player.raz
 			p.emoji = player.emoji or p.emoji
 			p.grabbedCard = player.grabbedCard or p.grabbedCard
 			p.proposition = player.proposition or p.proposition
