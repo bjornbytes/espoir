@@ -96,6 +96,10 @@ function client:update(dt)
 			self.proposition = 0
 		end
 
+		if self.dueling > 0 and self.duelTimer > 0 then
+			self.duelTimer = math.max(self.duelTimer - dt, 0)
+		end
+
 		local t = lovr.timer.getTime()
 		if self.state == 'server' and self.peer and (t - self.lastInput) >= config.inputRate then
 			local x, y, z = lovr.headset.getPosition()
@@ -263,11 +267,13 @@ function client:draw()
 					local other = self.players[self.dueling]
 					local hx, hy, hz = lovr.headset.getPosition()
 					local ox, oy, oz = denormalize(other.x, config.bounds), denormalize(other.y, config.bounds), denormalize(other.z, config.bounds)
-					local tx, ty, tz = (hx + ox) / 2, 1, (hz + oz) / 2
-					self.models.table:draw(tx, ty, tz, 1, quat():between(vec3(0, 0, -1), vec3(hx - ox, 0, hz - oz)):getAngleAxis())
+					local tx, ty, tz = (hx + ox) / 2, 1.2, (hz + oz) / 2
+					local angle = math.atan2((hy - ty), (hx - tx))
+					print(tx, ty, tz, angle)
+					self.models.table:draw(tx, ty, tz, .5, angle + math.pi / 2, 0, 1, 0)
 					lovr.graphics.setShader()
-					local angle, ax, ay, az = lovr.math.lookAt(hx, hy, hz, tx, ty + 1, tz)
-					lovr.graphics.print(math.ceil(self.duelTimer), tx, ty + 1, tz, .1, angle, ax, ay, az)
+					local angle, ax, ay, az = lovr.math.lookAt(hx, hy, hz, tx, ty + .8, tz)
+					lovr.graphics.print(math.ceil(self.duelTimer), tx, ty + .8, tz, .1, angle, ax, ay, az)
 					lovr.graphics.setShader(self.shader)
 				end
 			end
@@ -674,7 +680,6 @@ function client.messages.server.gamestate(self, data)
 end
 
 function client.messages.server.duel(self, data)
-	print('received dueling', data.first, data.second, self.id)
 	if data.first == self.id then
 		self.dueling = data.second
 		self.duelTimer = 10
