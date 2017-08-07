@@ -52,13 +52,15 @@ function server:update(dt)
 				for j = 1, config.maxPlayers do
 					if i ~= j and self.players[j] then
 						local p1, p2 = self.players[i], self.players[j]
-						if p1.proposition == p2.proposition and ((p1.lax - p2.lax) ^ 2 + (p1.lay - p2.lay) ^ 2 + (p1.laz - p2.laz) ^ 2) < .08 ^ 2 then
+						print(p1.proposition, p2.proposition, math.sqrt((p1.lax - p2.lax) ^ 2 + (p1.lay - p2.lay) ^ 2 + (p1.laz - p2.laz) ^ 2) < .08)
+						if p1.proposition == p2.proposition and math.sqrt((p1.lax - p2.lax) ^ 2 + (p1.lay - p2.lay) ^ 2 + (p1.laz - p2.laz) ^ 2) < .08 then
 							p1.dueling = j
 							p2.dueling = i
 							p1.duelTimer = 10
 							p2.duelTimer = 10
 							p1.proposition = 0
 							p2.proposition = 0
+							self:broadcast('duel', { first = i, second = j })
 						end
 					end
 				end
