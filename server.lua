@@ -48,12 +48,12 @@ function server:update(dt)
 
 	for i = 1, config.maxPlayers do
 		if self.players[i] then
-			if self.players[i].proposition > 0 then
+			if self.players[i].dueling == 0 and self.players[i].proposition > 0 then
 				for j = 1, config.maxPlayers do
-					if i ~= j and self.players[j] then
+					if i ~= j and self.players[j] and self.players[j].dueling == 0 then
 						local p1, p2 = self.players[i], self.players[j]
-						print(p1.proposition, p2.proposition, math.sqrt((p1.lax - p2.lax) ^ 2 + (p1.lay - p2.lay) ^ 2 + (p1.laz - p2.laz) ^ 2))
-						if p1.proposition == p2.proposition and math.sqrt((p1.lax - p2.lax) ^ 2 + (p1.lay - p2.lay) ^ 2 + (p1.laz - p2.laz) ^ 2) < .08 then
+						local thresh = (.08 / (config.bounds * 2)) * (2 ^ 16)
+						if p1.proposition == p2.proposition and math.sqrt((p1.lax - p2.lax) ^ 2 + (p1.lay - p2.lay) ^ 2 + (p1.laz - p2.laz) ^ 2) < thresh then
 							p1.dueling = j
 							p2.dueling = i
 							p1.duelTimer = 10
