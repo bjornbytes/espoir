@@ -432,6 +432,7 @@ function client:controllerremoved()
 end
 
 function client:controllerpressed(controller, button)
+	if self.state ~= 'server' then return end
 	if controller == self.controllers[2] and button == 'menu' then
 		self.emoji.active = true
 		self.emoji.vector = vec3(0, 0, -1):rotate(quat():angleAxis(self.controllers[2]:getOrientation()))
@@ -453,6 +454,7 @@ function client:controllerpressed(controller, button)
 end
 
 function client:controllerreleased(controller, button)
+	if self.state ~= 'server' then return end
 	if controller == self.controllers[2] and button == 'menu' and self.emoji.active == true then
 		local index = self:getEmojiIndex()
 		if index and index > 0 then
@@ -474,6 +476,7 @@ function client:getClosestCard()
 	if not self.controllers[2] then return nil end
 	local mindis, mincard = 1000000, nil
 	local player = self.players[self.id]
+	if not player then return nil end
 	local cardCount = 0
 	for i = 1, #player.cards do if player.cards[i].position > 0 then cardCount = cardCount + 1 end end
 	local spread = .075

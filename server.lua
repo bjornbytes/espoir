@@ -50,7 +50,7 @@ function server:update(dt)
 		if self.players[i] then
 			if self.players[i].proposition > 0 then
 				for j = 1, config.maxPlayers do
-					if i ~= j then
+					if i ~= j and self.players[j] then
 						local p1, p2 = self.players[i], self.players[j]
 						if p1.proposition == p2.proposition and ((p1.lax - p2.lax) ^ 2 + (p1.lay - p2.lay) ^ 2 + (p1.laz - p2.laz) ^ 2) < .08 ^ 2 then
 							p1.dueling = j
