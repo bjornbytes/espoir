@@ -52,6 +52,8 @@ function client:init()
 
 	self.proposition = 0
 	self.dueling = 0
+	self.duelChoice = 0
+	self.duelHover = false
 	self.duelTimer = 0
 
 	self.textures = {}
@@ -100,6 +102,16 @@ function client:update(dt)
 
 		if self.dueling > 0 and self.duelTimer > 0 then
 			self.duelTimer = math.max(self.duelTimer - dt, 0)
+			local tx, ty, tz, angle, slotX, slotY, slotZ = self:getDuelZones()
+			local x, y, z = self.controllers[2]:getPosition()
+			if math.sqrt((slotX - x) ^ 2 + (slotY - y) ^ 2 + (slotZ - z) ^ 2) < .1 then
+				if not self.duelHover then
+					self.duelHover = true
+					self.controllers[2]:vibrate(.002)
+				end
+			else
+				self.duelHover = false
+			end
 		end
 
 		local t = lovr.timer.getTime()
@@ -142,7 +154,8 @@ function client:update(dt)
 				raz = normalize(raz, 1),
 				emoji = self.emoji.current,
 				grabbedCard = self.cardGrab.card,
-				proposition = self.proposition
+				proposition = self.proposition,
+				duelChoice = self.duelChoice
 			})
 			self.lastInput = t
 		end
@@ -303,7 +316,20 @@ function client:draw()
 
 			for i, card in ipairs(player.cards) do
 				if player.cards[i].position > 0 then
-					if (player.id == self.id and self.cardGrab.active and self.cardGrab.card == i) or (player.grabbedCard == i) then
+					if (self.dueling > 0 and player.id == self.id and (self.duelChoice == i or (self.cardGrab.active and self.cardGrab.card == i and self.duelHover))) or (self.dueling == player.id and player.duelChoice == i) then
+						local tx, ty, tz, angle, mySlotX, mySlotY, mySlotZ, theirSlotX, theirSlotY, theirSlotZ = self:getDuelZones()
+						local x, y, z
+						if player.id == self.id then
+							x, y, z = mySlotX, mySlotY, mySlotZ
+						else
+							x, y, z = theirSlotX, theirSlotY, theirSlotZ
+						end
+						lovr.graphics.push()
+						lovr.graphics.translate(x, y, z)
+						lovr.graphics.rotate(-math.pi / 2, 1, 0, 0)
+						self:drawCard(player, i, 0, 0, 0, .5)
+						lovr.graphics.pop()
+					elseif (player.id == self.id and self.cardGrab.active and self.cardGrab.card == i) or (player.grabbedCard == i) then
 						local x, y, z, angle, ax, ay, az = self:getControllerTransform(player, 2)
 						lovr.graphics.push()
 						lovr.graphics.translate(x, y, z)
@@ -471,8 +497,8 @@ function client:controllerreleased(controller, button)
 		end
 		self.emoji.active = false
 	elseif controller == self.controllers[2] and button == 'trigger' and self.cardGrab.active then
-		if self.dueling > 0 then
-			--local tx, ty, tz, slotX, slotY, slotZ = self:getDuelZones()
+		if self.dueling > 0 and self.duelHover then
+			self.duelChoice = self.cardGrab.card
 		end
 
 		self:stopGrabbingCard()
@@ -489,8 +515,9 @@ function client:getDuelZones()
 	local ox, oy, oz = denormalize(other.x, config.bounds), denormalize(other.y, config.bounds), denormalize(other.z, config.bounds)
 	local tx, ty, tz = (hx + ox) / 2, tableHeight, (hz + oz) / 2
 	local angle = -math.atan2((hz - oz), (hx - ox))
-	local mySlotX, mySlotY, mySlotZ = tx - math.cos(-angle) * tableLength / 2 * .8, tableHeight + .2, tz - math.sin(-angle) * tableLength / 2 * .8
-	return tx, ty, tz, angle, mySlotX, mySlotY, mySlotZ
+	local mySlotX, mySlotY, mySlotZ = tx + math.cos(-angle) * tableLength / 2 * .8, tableHeight + .2, tz + math.sin(-angle) * tableLength / 2 * .8
+	local theirSlotX, theirSlotY, theirSlotZ = tx - math.cos(-angle) * tableLength / 2 * .8, tableHeight + .2, tz - math.sin(-angle) * tableLength / 2 * .8
+	return tx, ty, tz, angle, mySlotX, mySlotY, mySlotZ, theirSlotX, theirSlotY, theirSlotZ
 end
 
 function client:stopGrabbingCard()
@@ -690,6 +717,7 @@ function client.messages.server.sync(self, data)
 			p.emoji = player.emoji or p.emoji
 			p.grabbedCard = player.grabbedCard or p.grabbedCard
 			p.proposition = player.proposition or p.proposition
+			p.duelChoice = player.duelChoice or p.duelChoice
 		end
 	end
 end
@@ -702,10 +730,12 @@ end
 function client.messages.server.duel(self, data)
 	if data.first == self.id then
 		self.dueling = data.second
+		self.duelChoice = 0
 		self.duelTimer = 10
 		self.proposition = 0
 	elseif data.second == self.id then
 		self.dueling = data.first
+		self.duelChoice = 0
 		self.duelTimer = 10
 		self.proposition = 0
 	end

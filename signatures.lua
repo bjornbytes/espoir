@@ -37,7 +37,8 @@ signatures.client = {
     { 'raz', '16bits' },
 		{ 'emoji', '8bits' },
 		{ 'grabbedCard', '8bits' },
-		{ 'proposition', '2bits' }
+		{ 'proposition', '2bits' },
+		{ 'duelChoice', '4bits' }
   }
 }
 
@@ -89,7 +90,8 @@ signatures.server = {
     { 'cards', { { 'type', '2bits' }, { 'position', '4bits' } } },
 		{ 'emoji', '8bits' },
 		{ 'grabbedCard', '8bits' },
-		{ 'proposition', '2bits' }
+		{ 'proposition', '2bits' },
+		{ 'duelChoice', '4bits' }
   },
 
   'sync',
@@ -121,7 +123,8 @@ signatures.server = {
 				{ 'raz', '16bits' },
 				{ 'emoji', '8bits' },
 				{ 'grabbedCard', '8bits' },
-				{ 'proposition', '2bits' }
+				{ 'proposition', '2bits' },
+				{ 'duelChoice', '4bits' }
       }
     }
   },

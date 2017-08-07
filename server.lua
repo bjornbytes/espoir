@@ -60,6 +60,8 @@ function server:update(dt)
 							p2.duelTimer = 10
 							p1.proposition = 0
 							p2.proposition = 0
+							p1.duelChoice = 0
+							p2.duelChoice = 0
 							self:broadcast('duel', { first = i, second = j })
 						end
 					end
@@ -69,7 +71,11 @@ function server:update(dt)
 			if self.players[i].duelTimer > 0 then
 				self.players[i].duelTimer = math.max(self.players[i].duelTimer - dt, 0)
 				if self.players[i].duelTimer == 0 then
-					-- Timeout
+					-- Timeout, send outcome message
+					p1.dueling = 0
+					p2.dueling = 0
+					p1.duelChoice = 0
+					p2.duelChoice = 0
 				end
 			end
 		end
@@ -258,6 +264,7 @@ function server.messages.input(self, peer, data)
 	player.emoji = data.emoji
 	player.grabbedCard = data.grabbedCard
 	player.proposition = data.proposition
+	player.duelChoice = data.duelChoice
 end
 
 return server
