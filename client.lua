@@ -418,7 +418,7 @@ end
 
 function client:quit()
   if self.host and self.peer then
-    self.peer:disconnect()
+    self.peer:disconnect_now()
     self.host:flush()
   end
 end
