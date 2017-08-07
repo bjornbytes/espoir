@@ -261,8 +261,9 @@ function client:draw()
 
 				if self.dueling > 0 then
 					local other = self.players[self.dueling]
-					local tx, ty, tz = (player.x + other.x) / 2, 1, (player.z + other.z) / 2
-					self.models.table:draw(tx, ty, tz, 1, quat():between(vec3(player.x, 0, player.z), vec3(other.x, 0, other.z)):getAngleAxis())
+					local ox, oy, oz = denormalize(other.x, config.bounds), denormalize(other.y, config.bounds), denormalize(other.z, config.bounds)
+					local tx, ty, tz = (player.x + ox) / 2, 1, (player.z + oz) / 2
+					self.models.table:draw(tx, ty, tz, 1, quat():between(vec3(player.x, 0, player.z), vec3(ox, 0, oz)):getAngleAxis())
 					lovr.graphics.setShader()
 					local hx, hy, hz = lovr.headset.getPosition()
 					local angle, ax, ay, az = lovr.math.lookAt(hx, hy, hz, tx, ty + 1, tz)
