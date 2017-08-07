@@ -122,21 +122,21 @@ function client:update(dt)
 				x = normalize(x, config.bounds),
 				y = normalize(y, config.bounds),
 				z = normalize(z, config.bounds),
-				angle = math.floor((angle / (2 * math.pi)) * (2 ^ 16)),
+				angle = normalize(angle, 2 * math.pi),
 				ax = normalize(ax, 1),
 				ay = normalize(ay, 1),
 				az = normalize(az, 1),
 				lx = normalize(lx, config.bounds),
 				ly = normalize(ly, config.bounds),
 				lz = normalize(lz, config.bounds),
-				langle = math.floor((langle / (2 * math.pi)) * (2 ^ 16)),
+				langle = normalize(langle, 2 * math.pi),
 				lax = normalize(lax, 1),
 				lay = normalize(lay, 1),
 				laz = normalize(laz, 1),
 				rx = normalize(rx, config.bounds),
 				ry = normalize(ry, config.bounds),
 				rz = normalize(rz, config.bounds),
-				rangle = math.floor((rangle / (2 * math.pi)) * (2 ^ 16)),
+				rangle = normalize(rangle, 2 * math.pi),
 				rax = normalize(rax, 1),
 				ray = normalize(ray, 1),
 				raz = normalize(raz, 1),
@@ -398,11 +398,11 @@ function client:getControllerTransform(player, index)
 	else
 		if index == 1 then
 			local x, y, z = denormalize(player.lx, config.bounds), denormalize(player.ly, config.bounds), denormalize(player.lz, config.bounds)
-			local angle, ax, ay, az = (player.langle / (2 ^ 16)) * (2 * math.pi), denormalize(player.lax, 1), denormalize(player.lay, 1), denormalize(player.laz, 1)
+			local angle, ax, ay, az = denormalize(player.langle, 2 * math.pi), denormalize(player.lax, 1), denormalize(player.lay, 1), denormalize(player.laz, 1)
 			return x, y, z, angle, ax, ay, az
 		else
 			local x, y, z = denormalize(player.rx, config.bounds), denormalize(player.ry, config.bounds), denormalize(player.rz, config.bounds)
-			local angle, ax, ay, az = (player.rangle / (2 ^ 16)) * (2 * math.pi), denormalize(player.rax, 1), denormalize(player.ray, 1), denormalize(player.raz, 1)
+			local angle, ax, ay, az = denormalize(player.rangle, 2 * math.pi), denormalize(player.rax, 1), denormalize(player.ray, 1), denormalize(player.raz, 1)
 			return x, y, z, angle, ax, ay, az
 		end
 	end
