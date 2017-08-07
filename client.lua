@@ -39,7 +39,8 @@ function client:init()
 		money = lovr.graphics.newModel('media/moneystack.obj', 'media/money-tex.jpg'),
 		table = lovr.graphics.newModel('media/table.obj', 'media/table-tex.png'),
 		portrait = lovr.graphics.newModel('media/portrait.obj'),
-		landscape = lovr.graphics.newModel('media/landscape.obj')
+		landscape = lovr.graphics.newModel('media/landscape.obj'),
+		rug = lovr.graphics.newModel('media/rug.obj', 'media/rug-tex.jpg')
 	}
 	self.cardGrab = {
 		active = false,
@@ -161,6 +162,7 @@ function client:draw()
 		-- Ground
 		lovr.graphics.setColor(50, 50, 50)
 		lovr.graphics.plane('fill', 0, 0, 0, 10, math.pi / 2, 1, 0, 0)
+		self.models.rug:draw(0, .01, 0)
 
 		lovr.graphics.setColor(255, 255, 255)
 
