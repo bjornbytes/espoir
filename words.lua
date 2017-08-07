@@ -22,12 +22,15 @@ words.adjectives = {
 	'panicky',
 	'repulsive',
 	'salty',
+	'sassy',
+	'saucy',
 	'scary',
 	'silly',
 	'spazzy',
 	'thoughtless',
 	'uptight',
-	'worried'
+	'worried',
+	'young'
 }
 
 words.nouns = {
@@ -46,6 +49,7 @@ words.nouns = {
 	'cow',
 	'crab',
 	'crocodile',
+	'cub',
 	'deer',
 	'dog',
 	'dolphin',
