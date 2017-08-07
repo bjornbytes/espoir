@@ -270,15 +270,13 @@ function client:draw()
 				if self.dueling > 0 then
 					local other = self.players[self.dueling]
 					local hx, hy, hz = lovr.headset.getPosition()
-					local ox, oy, oz = denormalize(other.x, config.bounds), denormalize(other.y, config.bounds), denormalize(other.z, config.bounds)
-					local tx, ty, tz = (hx + ox) / 2, 1.1, (hz + oz) / 2
-					local angle = -math.atan2((hz - oz), (hx - ox))
-					print(tx, ty, tz, angle)
+					local tx, ty, tz, mySlotX, mySlotY, mySlotZ = self:getDuelZones()
 					self.models.table:draw(tx, ty, tz, .5, angle, 0, 1, 0)
 					lovr.graphics.setShader()
 					local angle, ax, ay, az = lovr.math.lookAt(hx, hy, hz, tx, ty + .8, tz)
 					lovr.graphics.print(math.ceil(self.duelTimer), tx, ty + .8, tz, .1, angle, ax, ay, az)
 					lovr.graphics.setShader(self.shader)
+					lovr.graphics.cube('fill', mySlotX, mySlotY, mySlotZ, .02)
 				end
 			end
 
@@ -473,8 +471,26 @@ function client:controllerreleased(controller, button)
 		end
 		self.emoji.active = false
 	elseif controller == self.controllers[2] and button == 'trigger' and self.cardGrab.active then
+		if self.dueling > 0 then
+			--local tx, ty, tz, slotX, slotY, slotZ = self:getDuelZones()
+		end
+
 		self:stopGrabbingCard()
 	end
+end
+
+-- 2.2m, 1.1m
+function client:getDuelZones()
+	if self.dueling == 0 then return nil end
+	local tableHeight = 1.1
+	local tableLength = 2.2
+	local other = self.players[self.dueling]
+	local hx, hy, hz = lovr.headset.getPosition()
+	local ox, oy, oz = denormalize(other.x, config.bounds), denormalize(other.y, config.bounds), denormalize(other.z, config.bounds)
+	local tx, ty, tz = (hx + ox) / 2, tableHeight, (hz + oz) / 2
+	local angle = -math.atan2((hz - oz), (hx - ox))
+	local mySlotX, mySlotY, mySlotZ = tx + math.cos(angle) * tableLength / 2 * .8, tableHeight + .1, tz + math.sin(angle) * tableLength / 2 * .8
+	return tx, ty, tz, mySlotX, mySlotY, mySlotZ
 end
 
 function client:stopGrabbingCard()
