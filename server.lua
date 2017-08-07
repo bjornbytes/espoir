@@ -97,7 +97,7 @@ function server:update(dt)
 						end
 
 						-- Tell everyone about the changes
-						self:broadcast('outcome', { first = i, second = p1.dueling, firstCards = p1.cards, secondCards = p2.cards, firstStars = p1.stars, secondStars = p2.stars })
+						self:broadcast('outcome', { first = i, second = p2.id, firstCards = p1.cards, secondCards = p2.cards, firstStars = p1.stars, secondStars = p2.stars })
 					end
 				end
 
@@ -117,7 +117,7 @@ function server:update(dt)
 							p1.stars = p1.stars - 1
 						end
 
-						self:broadcast('outcome', { first = i, second = p1.dueling, firstCards = p1.cards, secondCards = p2.cards, firstStars = p1.stars, secondStars = p2.stars })
+						self:broadcast('outcome', { first = i, second = p2.id, firstCards = p1.cards, secondCards = p2.cards, firstStars = p1.stars, secondStars = p2.stars })
 					end
 				end
 			end

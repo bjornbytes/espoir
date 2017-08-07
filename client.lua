@@ -329,8 +329,7 @@ function client:draw()
 						end
 						lovr.graphics.push()
 						lovr.graphics.translate(x, y, z)
-						lovr.graphics.rotate(-math.pi / 2, 1, 0, 0)
-						lovr.graphics.rotate(angle, 0, 1, 0)
+						lovr.graphics.rotate(-math.pi / 4, 1, 0, 0)
 						self:drawCard(player, i, 0, 0, 0, .5)
 						lovr.graphics.pop()
 					elseif (player.id == self.id and self.cardGrab.active and self.cardGrab.card == i) or (player.grabbedCard == i) then
@@ -440,7 +439,7 @@ function client:drawCard(player, cardIndex, ...)
 	local card = player.cards[cardIndex]
 	if card.position <= 0 then return end
 
-	if player.id == self.id or cardIndex == player.grabbedCard or (self.dueling == player.id and self.duelChoice > 0 and player.duelChoice > 0) then
+	if player.id == self.id or (cardIndex == player.grabbedCard and self.dueling ~= player.id) or (self.dueling == player.id and self.duelChoice > 0 and player.duelChoice > 0) then
 		lovr.graphics.setColor(255, 255, 255)
 	else
 		lovr.graphics.setColor(0, 0, 0)
@@ -759,7 +758,7 @@ function client.messages.server.outcome(self, data)
 		p2.cards = data.secondCards
 	end
 
-	if p1.id == self.id or p2.id == self.id then
+	if (p1 and p1.id == self.id) or (p2 and p2.id == self.id) then
 		self.dueling = 0
 		self.duelChoice = 0
 		self.duelTimer = 0
