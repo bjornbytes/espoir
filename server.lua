@@ -72,10 +72,6 @@ function server:update(dt)
 				self.players[i].duelTimer = math.max(self.players[i].duelTimer - dt, 0)
 				if self.players[i].duelTimer == 0 then
 					-- Timeout, send outcome message
-					p1.dueling = 0
-					p2.dueling = 0
-					p1.duelChoice = 0
-					p2.duelChoice = 0
 				end
 			end
 		end

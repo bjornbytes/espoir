@@ -104,6 +104,7 @@ function client:update(dt)
 			self.duelTimer = math.max(self.duelTimer - dt, 0)
 			local tx, ty, tz, angle, slotX, slotY, slotZ = self:getDuelZones()
 			local x, y, z = self.controllers[2]:getPosition()
+			print(tx, ty, tz, x, y, z, math.sqrt((slotX - x) ^ 2 + (slotY - y) ^ 2 + (slotZ - z) ^ 2), .1)
 			if math.sqrt((slotX - x) ^ 2 + (slotY - y) ^ 2 + (slotZ - z) ^ 2) < .1 then
 				if not self.duelHover then
 					self.duelHover = true
@@ -516,7 +517,7 @@ function client:getDuelZones()
 	local tx, ty, tz = (hx + ox) / 2, tableHeight, (hz + oz) / 2
 	local angle = -math.atan2((hz - oz), (hx - ox))
 	local mySlotX, mySlotY, mySlotZ = tx + math.cos(-angle) * tableLength / 2 * .8, tableHeight + .2, tz + math.sin(-angle) * tableLength / 2 * .8
-	local theirSlotX, theirSlotY, theirSlotZ = tx - math.cos(-angle) * tableLength / 2 * .8, tableHeight + .2, tz - math.sin(-angle) * tableLength / 2 * .8
+	local theirSlotX, theirSlotY, theirSlotZ = tx - math.cos(-angle) * tableLength * .6 / 2 * .8, tableHeight + .2, tz - math.sin(-angle) * tableLength * .6 / 2 * .8
 	return tx, ty, tz, angle, mySlotX, mySlotY, mySlotZ, theirSlotX, theirSlotY, theirSlotZ
 end
 
