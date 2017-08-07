@@ -27,6 +27,7 @@ words.adjectives = {
 	'scary',
 	'silly',
 	'spazzy',
+	'spicy',
 	'thoughtless',
 	'uptight',
 	'worried',
