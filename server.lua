@@ -52,7 +52,7 @@ function server:update(dt)
 				for j = 1, config.maxPlayers do
 					if i ~= j and self.players[j] then
 						local p1, p2 = self.players[i], self.players[j]
-						print(p1.proposition, p2.proposition, math.sqrt((p1.lax - p2.lax) ^ 2 + (p1.lay - p2.lay) ^ 2 + (p1.laz - p2.laz) ^ 2) < .08)
+						print(p1.proposition, p2.proposition, math.sqrt((p1.lax - p2.lax) ^ 2 + (p1.lay - p2.lay) ^ 2 + (p1.laz - p2.laz) ^ 2))
 						if p1.proposition == p2.proposition and math.sqrt((p1.lax - p2.lax) ^ 2 + (p1.lay - p2.lay) ^ 2 + (p1.laz - p2.laz) ^ 2) < .08 then
 							p1.dueling = j
 							p2.dueling = i
