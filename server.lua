@@ -82,7 +82,7 @@ function server:update(dt)
 			end
 		end
 
-		self:broadcast('sync', payload)
+		self:broadcast('sync', payload, 'unreliable')
 		self.lastSync = t
 	end
 end
@@ -108,12 +108,12 @@ function server:send(peer, message, data)
   peer:send(tostring(self.upload))
 end
 
-function server:broadcast(message, data)
+function server:broadcast(message, data, method)
   log('all', 'broadcast', message)
   self.upload:clear()
   self.upload:write(signatures.server[message].id, '4bits')
   self.upload:pack(data, signatures.server[message])
-  self.host:broadcast(tostring(self.upload), 0, 'unreliable')
+  self.host:broadcast(tostring(self.upload), 0, method or 'reliable')
 end
 
 function server:generateUsername()
