@@ -21,16 +21,16 @@ return {
 		'cry',
 		'joy',
 		'smirk',
-		'thinking',
+		'gg',
 		'okhand',
 		'moneybags',
 		'redquestion',
-		'pray',
-		'gg',
+		'exclamation',
+		'zzz',
 		'1',
 		'2',
 		'3',
 		'wave',
-		'zzz'
+		'pray'
 	}
 }
