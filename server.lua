@@ -53,6 +53,7 @@ function server:update(dt)
 					if i ~= j and self.players[j] and self.players[j].dueling == 0 then
 						local p1, p2 = self.players[i], self.players[j]
 						local thresh = (.08 / (config.bounds * 2)) * (2 ^ 16)
+						print(math.sqrt((p1.rx - p2.rx) ^ 2 + (p1.ry - p2.ry) ^ 2 + (p1.rz - p2.rz) ^ 2), thresh)
 						if p1.proposition == p2.proposition and math.sqrt((p1.rx - p2.rx) ^ 2 + (p1.ry - p2.ry) ^ 2 + (p1.rz - p2.rz) ^ 2) < thresh then
 							p1.dueling = j
 							p2.dueling = i
