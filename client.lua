@@ -65,6 +65,7 @@ function client:init()
 	self.textures.landscape2 = lovr.graphics.newTexture('media/landscape2-tex.png')
 	self.textures.landscape3 = lovr.graphics.newTexture('media/landscape3-tex.png')
 	self.textures.landscape4 = lovr.graphics.newTexture('media/landscape4-tex.png')
+	self.textures.wall = lovr.graphics.newTexture('media/wall-tex.png')
 
 	self.shader = require('media/shader')
 	self.viewMat = lovr.math.newTransform()
@@ -162,9 +163,10 @@ function client:draw()
 		-- Ground
 		lovr.graphics.setColor(50, 50, 50)
 		lovr.graphics.plane('fill', 0, 0, 0, 10, math.pi / 2, 1, 0, 0)
-		self.models.rug:draw(0, .01, 0)
 
+		-- Rug
 		lovr.graphics.setColor(255, 255, 255)
+		self.models.rug:draw(0, .01, 0)
 
 		-- Left wall
 		lovr.graphics.push()
@@ -172,7 +174,7 @@ function client:draw()
 		self.models.landscape:setTexture(self.textures.landscape1)
 		self.models.landscape:draw(.05, 0, 0, 1)
 		lovr.graphics.scale(1, 3, 10)
-		lovr.graphics.plane('fill', 0, 0, 0, 1, math.pi / 2, 0, 1, 0)
+		lovr.graphics.plane(self.textures.wall, 0, 0, 0, 1, math.pi / 2, 0, 1, 0)
 		lovr.graphics.pop()
 
 		-- Right wall
@@ -181,7 +183,7 @@ function client:draw()
 		self.models.landscape:setTexture(self.textures.landscape2)
 		self.models.landscape:draw(-.05, 0, 0, 1, math.pi, 0, 1, 0)
 		lovr.graphics.scale(1, 3, 10)
-		lovr.graphics.plane('fill', 0, 0, 0, 1, -math.pi / 2, 0, 1, 0)
+		lovr.graphics.plane(self.textures.wall, 0, 0, 0, 1, -math.pi / 2, 0, 1, 0)
 		lovr.graphics.pop()
 
 		-- Front wall
@@ -192,7 +194,7 @@ function client:draw()
 		self.models.portrait:setTexture(self.textures.portrait2)
 		self.models.portrait:draw(3, 0, .05, 1, -math.pi / 2, 0, 1, 0)
 		lovr.graphics.scale(10, 3, 1)
-		lovr.graphics.plane('fill', 0, 0, 0, 1)
+		lovr.graphics.plane(self.textures.wall, 0, 0, 0, 1)
 		lovr.graphics.pop()
 
 		-- Back wall
@@ -203,7 +205,7 @@ function client:draw()
 		self.models.landscape:setTexture(self.textures.landscape4)
 		self.models.landscape:draw(3, 0, -.05, 1, math.pi / 2, 0, 1, 0)
 		lovr.graphics.scale(10, 3, 1)
-		lovr.graphics.plane('fill', 0, 0, 0, 1)
+		lovr.graphics.plane(self.textures.wall, 0, 0, 0, 1)
 		lovr.graphics.pop()
 
 		for i, player in ipairs(self.players) do
